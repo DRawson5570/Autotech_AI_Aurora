@@ -1,0 +1,325 @@
+diff --git a/backend/open_webui/config.py b/backend/open_webui/config.py
+index dab5b6c..3183f52 100644
+--- a/backend/open_webui/config.py
++++ b/backend/open_webui/config.py
+@@ -19,7 +19,6 @@ from authlib.integrations.starlette_client import OAuth
+ from open_webui.env import (
+     DATA_DIR,
+     DATABASE_URL,
+-    ENABLE_DB_MIGRATIONS,
+     ENV,
+     REDIS_URL,
+     REDIS_KEY_PREFIX,
+@@ -68,8 +67,7 @@ def run_migrations():
+         log.exception(f"Error running migrations: {e}")
+ 
+ 
+-if ENABLE_DB_MIGRATIONS:
+-    run_migrations()
++run_migrations()
+ 
+ 
+ class Config(Base):
+@@ -162,8 +160,6 @@ T = TypeVar("T")
+ ENABLE_PERSISTENT_CONFIG = (
+     os.environ.get("ENABLE_PERSISTENT_CONFIG", "True").lower() == "true"
+ )
+-
+-
+ class PersistentConfig(Generic[T]):
+     def __init__(self, env_name: str, config_path: str, env_value: T):
+         self.env_name = env_name
+@@ -285,6 +281,20 @@ class AppConfig:
+         return self._state[key].value
+ 
+ 
++# Billing
++#
++# Per-token USD rate used to price token purchases for end users.
++# This is persisted via the DB-backed config system so admins can update pricing at runtime.
++#
++# Default matches existing env-based estimate used in billing admin exports.
++
++BILLING_TOKEN_USD_RATE = PersistentConfig(
++    "BILLING_TOKEN_USD_RATE",
++    "billing.token_usd_rate",
++    float(os.environ.get("BILLING_TOKEN_USD_RATE", "0.00002")),
++)
++
++
+ ####################################
+ # WEBUI_AUTH (Required for security)
+ ####################################
+@@ -1081,6 +1091,49 @@ OPENAI_API_CONFIGS = PersistentConfig(
+     {},
+ )
+ 
++# GOOGLE Generative API
++ENABLE_GOOGLE_API = PersistentConfig(
++    "ENABLE_GOOGLE_API",
++    "google.enable",
++    os.environ.get("ENABLE_GOOGLE_API", "False").lower() == "true",
++)
++
++GOOGLE_API_BASE_URL = os.environ.get(
++    "GOOGLE_API_BASE_URL", "https://generativelanguage.googleapis.com/v1"
++)
++
++GOOGLE_API_KEYS = os.environ.get("GOOGLE_API_KEYS", "")
++GOOGLE_API_KEYS = GOOGLE_API_KEYS if GOOGLE_API_KEYS != "" else os.environ.get("GOOGLE_API_KEY", "")
++GOOGLE_API_KEYS = [url.strip() for url in GOOGLE_API_KEYS.split(";") if url.strip()]
++GOOGLE_API_KEYS = PersistentConfig(
++    "GOOGLE_API_KEYS",
++    "google.api_keys",
++    GOOGLE_API_KEYS,
++)
++
++GOOGLE_API_BASE_URLS = os.environ.get("GOOGLE_API_BASE_URLS", "")
++GOOGLE_API_BASE_URLS = (
++    GOOGLE_API_BASE_URLS
++    if GOOGLE_API_BASE_URLS != ""
++    else GOOGLE_API_BASE_URL
++)
++GOOGLE_API_BASE_URLS = [
++    url.strip() if url != "" else GOOGLE_API_BASE for url in GOOGLE_API_BASE_URLS.split(";")
++]
++GOOGLE_API_BASE_URLS = PersistentConfig(
++    "GOOGLE_API_BASE_URLS",
++    "google.api_base_urls",
++    GOOGLE_API_BASE_URLS,
++)
++
++# Persistent storage for provider-level credentials (encrypted). This holds provider-specific
++# encrypted API keys or other credentials so admin-set credentials survive restarts.
++MODEL_PROVIDER_CREDENTIALS = PersistentConfig(
++    "MODEL_PROVIDER_CREDENTIALS",
++    "model_provider.credentials",
++    {},
++)
++
+ # Get the actual OpenAI API key based on the base URL
+ OPENAI_API_KEY = ""
+ try:
+@@ -1357,7 +1410,7 @@ USER_PERMISSIONS_NOTES_ALLOW_PUBLIC_SHARING = (
+ 
+ 
+ USER_PERMISSIONS_CHAT_CONTROLS = (
+-    os.environ.get("USER_PERMISSIONS_CHAT_CONTROLS", "True").lower() == "true"
++    os.environ.get("USER_PERMISSIONS_CHAT_CONTROLS", "False").lower() == "true"
+ )
+ 
+ USER_PERMISSIONS_CHAT_VALVES = (
+@@ -1470,15 +1523,6 @@ USER_PERMISSIONS_FEATURES_API_KEYS = (
+     os.environ.get("USER_PERMISSIONS_FEATURES_API_KEYS", "False").lower() == "true"
+ )
+ 
+-USER_PERMISSIONS_FEATURES_MEMORIES = (
+-    os.environ.get("USER_PERMISSIONS_FEATURES_MEMORIES", "True").lower() == "true"
+-)
+-
+-
+-USER_PERMISSIONS_SETTINGS_INTERFACE = (
+-    os.environ.get("USER_PERMISSIONS_SETTINGS_INTERFACE", "True").lower() == "true"
+-)
+-
+ 
+ DEFAULT_USER_PERMISSIONS = {
+     "workspace": {
+@@ -1537,10 +1581,6 @@ DEFAULT_USER_PERMISSIONS = {
+         "web_search": USER_PERMISSIONS_FEATURES_WEB_SEARCH,
+         "image_generation": USER_PERMISSIONS_FEATURES_IMAGE_GENERATION,
+         "code_interpreter": USER_PERMISSIONS_FEATURES_CODE_INTERPRETER,
+-        "memories": USER_PERMISSIONS_FEATURES_MEMORIES,
+-    },
+-    "settings": {
+-        "interface": USER_PERMISSIONS_SETTINGS_INTERFACE,
+     },
+ }
+ 
+@@ -1556,12 +1596,6 @@ ENABLE_FOLDERS = PersistentConfig(
+     os.environ.get("ENABLE_FOLDERS", "True").lower() == "true",
+ )
+ 
+-FOLDER_MAX_FILE_COUNT = PersistentConfig(
+-    "FOLDER_MAX_FILE_COUNT",
+-    "folders.max_file_count",
+-    os.environ.get("FOLDER_MAX_FILE_COUNT", ""),
+-)
+-
+ ENABLE_CHANNELS = PersistentConfig(
+     "ENABLE_CHANNELS",
+     "channels.enable",
+@@ -1574,12 +1608,6 @@ ENABLE_NOTES = PersistentConfig(
+     os.environ.get("ENABLE_NOTES", "True").lower() == "true",
+ )
+ 
+-ENABLE_USER_STATUS = PersistentConfig(
+-    "ENABLE_USER_STATUS",
+-    "users.enable_status",
+-    os.environ.get("ENABLE_USER_STATUS", "True").lower() == "true",
+-)
+-
+ ENABLE_EVALUATION_ARENA_MODELS = PersistentConfig(
+     "ENABLE_EVALUATION_ARENA_MODELS",
+     "evaluation.arena.enable",
+@@ -2094,12 +2122,6 @@ ENABLE_CODE_INTERPRETER = PersistentConfig(
+     os.environ.get("ENABLE_CODE_INTERPRETER", "True").lower() == "true",
+ )
+ 
+-ENABLE_MEMORIES = PersistentConfig(
+-    "ENABLE_MEMORIES",
+-    "memories.enable",
+-    os.environ.get("ENABLE_MEMORIES", "True").lower() == "true",
+-)
+-
+ CODE_INTERPRETER_ENGINE = PersistentConfig(
+     "CODE_INTERPRETER_ENGINE",
+     "code_interpreter.engine",
+@@ -2373,51 +2395,6 @@ else:
+     except Exception:
+         PGVECTOR_IVFFLAT_LISTS = 100
+ 
+-# openGauss
+-OPENGAUSS_DB_URL = os.environ.get("OPENGAUSS_DB_URL", DATABASE_URL)
+-
+-OPENGAUSS_INITIALIZE_MAX_VECTOR_LENGTH = int(
+-    os.environ.get("OPENGAUSS_INITIALIZE_MAX_VECTOR_LENGTH", "1536")
+-)
+-
+-OPENGAUSS_POOL_SIZE = os.environ.get("OPENGAUSS_POOL_SIZE", None)
+-
+-if OPENGAUSS_POOL_SIZE != None:
+-    try:
+-        OPENGAUSS_POOL_SIZE = int(OPENGAUSS_POOL_SIZE)
+-    except Exception:
+-        OPENGAUSS_POOL_SIZE = None
+-
+-OPENGAUSS_POOL_MAX_OVERFLOW = os.environ.get("OPENGAUSS_POOL_MAX_OVERFLOW", 0)
+-
+-if OPENGAUSS_POOL_MAX_OVERFLOW == "":
+-    OPENGAUSS_POOL_MAX_OVERFLOW = 0
+-else:
+-    try:
+-        OPENGAUSS_POOL_MAX_OVERFLOW = int(OPENGAUSS_POOL_MAX_OVERFLOW)
+-    except Exception:
+-        OPENGAUSS_POOL_MAX_OVERFLOW = 0
+-
+-OPENGAUSS_POOL_TIMEOUT = os.environ.get("OPENGAUSS_POOL_TIMEOUT", 30)
+-
+-if OPENGAUSS_POOL_TIMEOUT == "":
+-    OPENGAUSS_POOL_TIMEOUT = 30
+-else:
+-    try:
+-        OPENGAUSS_POOL_TIMEOUT = int(OPENGAUSS_POOL_TIMEOUT)
+-    except Exception:
+-        OPENGAUSS_POOL_TIMEOUT = 30
+-
+-OPENGAUSS_POOL_RECYCLE = os.environ.get("OPENGAUSS_POOL_RECYCLE", 3600)
+-
+-if OPENGAUSS_POOL_RECYCLE == "":
+-    OPENGAUSS_POOL_RECYCLE = 3600
+-else:
+-    try:
+-        OPENGAUSS_POOL_RECYCLE = int(OPENGAUSS_POOL_RECYCLE)
+-    except Exception:
+-        OPENGAUSS_POOL_RECYCLE = 3600
+-
+ # Pinecone
+ PINECONE_API_KEY = os.environ.get("PINECONE_API_KEY", None)
+ PINECONE_ENVIRONMENT = os.environ.get("PINECONE_ENVIRONMENT", None)
+@@ -2893,12 +2870,6 @@ RAG_TEXT_SPLITTER = PersistentConfig(
+     os.environ.get("RAG_TEXT_SPLITTER", ""),
+ )
+ 
+-ENABLE_MARKDOWN_HEADER_TEXT_SPLITTER = PersistentConfig(
+-    "ENABLE_MARKDOWN_HEADER_TEXT_SPLITTER",
+-    "rag.enable_markdown_header_text_splitter",
+-    os.environ.get("ENABLE_MARKDOWN_HEADER_TEXT_SPLITTER", "True").lower() == "true",
+-)
+-
+ 
+ TIKTOKEN_CACHE_DIR = os.environ.get("TIKTOKEN_CACHE_DIR", f"{CACHE_DIR}/tiktoken")
+ TIKTOKEN_ENCODING_NAME = PersistentConfig(
+@@ -2911,13 +2882,6 @@ TIKTOKEN_ENCODING_NAME = PersistentConfig(
+ CHUNK_SIZE = PersistentConfig(
+     "CHUNK_SIZE", "rag.chunk_size", int(os.environ.get("CHUNK_SIZE", "1000"))
+ )
+-
+-CHUNK_MIN_SIZE_TARGET = PersistentConfig(
+-    "CHUNK_MIN_SIZE_TARGET",
+-    "rag.chunk_min_size_target",
+-    int(os.environ.get("CHUNK_MIN_SIZE_TARGET", "0")),
+-)
+-
+ CHUNK_OVERLAP = PersistentConfig(
+     "CHUNK_OVERLAP",
+     "rag.chunk_overlap",
+@@ -2929,7 +2893,7 @@ Respond to the user query using the provided context, incorporating inline citat
+ 
+ ### Guidelines:
+ - If you don't know the answer, clearly state that.
+-- If uncertain, ask the user for clarification.
++- If the context provides relevant data, use it directly to answer the query.
+ - Respond in the same language as the user's query.
+ - If the context is unreadable or of poor quality, inform the user and provide the best possible answer.
+ - If the answer isn't present in the context but you possess the knowledge, explain this to the user and provide the answer using your own understanding.
+@@ -3218,24 +3182,12 @@ SERPLY_API_KEY = PersistentConfig(
+     os.getenv("SERPLY_API_KEY", ""),
+ )
+ 
+-DDGS_BACKEND = PersistentConfig(
+-    "DDGS_BACKEND",
+-    "rag.web.search.ddgs_backend",
+-    os.getenv("DDGS_BACKEND", "auto"),
+-)
+-
+ JINA_API_KEY = PersistentConfig(
+     "JINA_API_KEY",
+     "rag.web.search.jina_api_key",
+     os.getenv("JINA_API_KEY", ""),
+ )
+ 
+-JINA_API_BASE_URL = PersistentConfig(
+-    "JINA_API_BASE_URL",
+-    "rag.web.search.jina_api_base_url",
+-    os.getenv("JINA_API_BASE_URL", ""),
+-)
+-
+ SEARCHAPI_API_KEY = PersistentConfig(
+     "SEARCHAPI_API_KEY",
+     "rag.web.search.searchapi_api_key",
+@@ -3370,12 +3322,6 @@ FIRECRAWL_API_BASE_URL = PersistentConfig(
+     os.environ.get("FIRECRAWL_API_BASE_URL", "https://api.firecrawl.dev"),
+ )
+ 
+-FIRECRAWL_TIMEOUT = PersistentConfig(
+-    "FIRECRAWL_TIMEOUT",
+-    "rag.web.loader.firecrawl_timeout",
+-    os.environ.get("FIRECRAWL_TIMEOUT", ""),
+-)
+-
+ EXTERNAL_WEB_SEARCH_URL = PersistentConfig(
+     "EXTERNAL_WEB_SEARCH_URL",
+     "rag.web.search.external_web_search_url",
+@@ -3737,16 +3683,17 @@ WHISPER_MODEL = PersistentConfig(
+     os.getenv("WHISPER_MODEL", "base"),
+ )
+ 
+-WHISPER_COMPUTE_TYPE = os.getenv("WHISPER_COMPUTE_TYPE", "int8")
+ WHISPER_MODEL_DIR = os.getenv("WHISPER_MODEL_DIR", f"{CACHE_DIR}/whisper/models")
+ WHISPER_MODEL_AUTO_UPDATE = (
+     not OFFLINE_MODE
+     and os.environ.get("WHISPER_MODEL_AUTO_UPDATE", "").lower() == "true"
+ )
+ 
+-WHISPER_VAD_FILTER = os.getenv("WHISPER_VAD_FILTER", "False").lower() == "true"
+-
+-WHISPER_MULTILINGUAL = os.getenv("WHISPER_MULTILINGUAL", "False").lower() == "true"
++WHISPER_VAD_FILTER = PersistentConfig(
++    "WHISPER_VAD_FILTER",
++    "audio.stt.whisper_vad_filter",
++    os.getenv("WHISPER_VAD_FILTER", "False").lower() == "true",
++)
+ 
+ WHISPER_LANGUAGE = os.getenv("WHISPER_LANGUAGE", "").lower() or None
+ 

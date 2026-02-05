@@ -1,0 +1,28 @@
+{
+  "scenario_id": "EDM_003",
+  "predictions": [
+    {
+      "hypothesis": "BMS cell imbalance / high internal resistance cell",
+      "prob": 0.5,
+      "reason": [
+        "Ia_max high vs Vdc_min low",
+        "coolant temp within limits",
+        "no immediate failure signs"
+      ],
+      "tests": [
+        "measure cell_voltage_1_history",
+        "measure cell_voltage_2_history",
+        "measure cell_internal_resistance_history",
+        "measure cell_temperature_history"
+      ],
+      "mitigation": "reduce battery load, schedule inspection of suspected cells"
+    }
+  ],
+  "requested_measurements": [
+    "cell_voltage_1_history",
+    "cell_voltage_2_history",
+    "cell_internal_resistance_history",
+    "cell_temperature_history"
+  ],
+  "explanation": "Current data shows high current and low DC bus voltage, suggestive of a lagging cell; history measurements are needed to confirm imbalance."
+}

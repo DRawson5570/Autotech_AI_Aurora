@@ -1,0 +1,26 @@
+{
+  "scenario_id": "EDM_010",
+  "predictions": [
+    {
+      "hypothesis": "Phase FET short (phase A)",
+      "prob": 0.92,
+      "reason": [
+        "Ia_max 6783 A",
+        "OVERCURRENT_FAULT status",
+        "high Ia_median"
+      ],
+      "tests": [
+        "measure phase current history",
+        "measure phase voltage to ground",
+        "measure inverter temperature"
+      ],
+      "mitigation": "Isolate phase, limit torque, schedule repair"
+    }
+  ],
+  "requested_measurements": [
+    "phase_current_history",
+    "phase_voltage_to_ground",
+    "inverter_temperature"
+  ],
+  "explanation": "High current and overcurrent fault strongly point to phase FET short; requesting detailed phase data and temperature will confirm."
+}

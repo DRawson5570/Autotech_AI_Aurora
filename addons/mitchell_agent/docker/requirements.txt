@@ -1,0 +1,15 @@
+# Mitchell Agent Requirements
+# ===========================
+# Dependencies for the polling agent
+
+# HTTP client
+httpx>=0.24.0
+
+# Configuration
+pydantic>=2.0.0
+
+# Browser automation (Playwright)
+playwright>=1.40.0
+
+# Async support
+asyncio-atexit>=1.0.0

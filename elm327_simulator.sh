@@ -1,0 +1,1 @@
+addons/scan_tool/scripts/elm327_simulator.sh

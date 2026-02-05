@@ -1,0 +1,24 @@
+{
+  "scenario_id": "EDM_002",
+  "predictions": [
+    {
+      "hypothesis": "Phase FET short (phase A)",
+      "prob": 0.8,
+      "reason": [
+        "Large spike in Ia observed"
+      ],
+      "tests": [],
+      "mitigation": "See recommended fix in scenario and FMEA"
+    },
+    {
+      "hypothesis": "BMS cell imbalance / high internal resistance cell",
+      "prob": 0.6,
+      "reason": [
+        "Significant Vdc sag detected"
+      ],
+      "tests": [],
+      "mitigation": "See recommended fix in scenario and FMEA"
+    }
+  ],
+  "explanation": "Mock heuristic predictions; replace with real model adapter for experiments"
+}

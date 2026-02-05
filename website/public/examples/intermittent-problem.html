@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Intermittent Problems Example - Autotech AI</title>
+    <meta name="description" content="Learn how to describe intermittent vehicle problems to get targeted diagnostic recommendations." />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: { sans: ['Inter', 'sans-serif'] },
+            colors: {
+              slate: { 800: '#1e293b', 850: '#171717', 900: '#0a0a0a', 950: '#050505' },
+              brand: { blue: '#06b6d4', orange: '#14b8a6', accent: '#22d3ee', dark: '#083344' }
+            },
+          },
+        },
+      }
+    </script>
+    <style>
+      ::-webkit-scrollbar { width: 10px; }
+      ::-webkit-scrollbar-track { background: #0a0a0a; }
+      ::-webkit-scrollbar-thumb { background: #334155; border-radius: 5px; }
+    </style>
+  </head>
+  <body class="bg-slate-950 text-slate-200 font-sans antialiased">
+    
+    <!-- Header -->
+    <header class="fixed w-full top-0 z-50 bg-slate-950/90 backdrop-blur-md border-b border-slate-800/50">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+          <a href="/" class="flex items-center space-x-2">
+            <div class="bg-gradient-to-br from-cyan-500 to-cyan-400 p-2 rounded-lg">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              </svg>
+            </div>
+            <span class="text-xl font-bold text-white tracking-tight">Autotech <span class="text-cyan-400">AI</span></span>
+          </a>
+          <nav class="hidden md:flex space-x-8">
+            <a href="/" class="text-slate-300 hover:text-white transition-colors">Home</a>
+            <a href="/examples/" class="text-brand-blue font-medium">Examples</a>
+          </nav>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="pt-24 pb-16">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Breadcrumb -->
+        <nav class="mb-8 text-sm">
+          <a href="/examples/" class="text-slate-400 hover:text-white">Examples</a>
+          <span class="text-slate-600 mx-2">/</span>
+          <span class="text-brand-blue">Intermittent Problems</span>
+        </nav>
+
+        <!-- Page Header -->
+        <div class="mb-12">
+          <span class="inline-block px-3 py-1 text-xs font-medium text-orange-400 bg-orange-500/20 rounded-full mb-4">Advanced</span>
+          <h1 class="text-4xl font-extrabold text-white mb-4">Intermittent Problems</h1>
+          <p class="text-xl text-slate-400">The hardest ones to diagnose. Here's how to describe them effectively to get targeted test recommendations.</p>
+        </div>
+
+        <!-- Warning Box -->
+        <div class="bg-orange-500/10 border border-orange-500/30 rounded-2xl p-6 mb-8">
+          <h2 class="text-lg font-bold text-white mb-3 flex items-center">
+            <span class="text-2xl mr-3">⚡</span> Why Intermittents Are Tough
+          </h2>
+          <p class="text-slate-300">
+            Intermittent problems don't set codes reliably, don't show up on command, and can have multiple root causes. The key is capturing <strong class="text-orange-300">specific conditions</strong> when the problem occurs — temperature, load, vibration, humidity, time of day. The more patterns you can identify, the more targeted the diagnosis.
+          </p>
+        </div>
+
+        <!-- Scenario Box -->
+        <div class="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 mb-8">
+          <h2 class="text-lg font-bold text-white mb-3 flex items-center">
+            <span class="text-2xl mr-3">📋</span> The Scenario
+          </h2>
+          <p class="text-slate-300">
+            A 2017 Nissan Altima comes in with an intermittent no-start. Customer says <em>"Sometimes it just clicks when I turn the key, but if I wait 10 minutes it starts fine."</em> No check engine light when running.
+          </p>
+        </div>
+
+        <!-- The DETAILED Description -->
+        <div class="mb-10">
+          <h2 class="text-2xl font-bold text-white mb-4 flex items-center">
+            <span class="w-8 h-8 bg-brand-blue rounded-full flex items-center justify-center text-sm font-bold text-white mr-3">1</span>
+            Describe the Pattern
+          </h2>
+          
+          <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+            <div class="bg-slate-800 px-4 py-2 text-xs text-slate-400 border-b border-slate-700">
+              Your message
+            </div>
+            <div class="p-4">
+              <p class="text-white font-mono text-sm bg-slate-800 rounded-lg p-4 whitespace-pre-line">2017 Nissan Altima 2.5L, 92,000 miles
+
+Intermittent no-start issue. Here's what I've observed:
+
+When it happens:
+- About 2-3 times per week
+- More common in the morning after sitting overnight
+- Seems worse on cold days
+- Never happens when the engine is warm
+
+What it does:
+- Turn key to start → single click, no crank
+- Lights/radio work fine (battery seems OK)
+- If I wait 10-15 minutes, it starts normally
+- No grinding, no slow crank — just one click
+
+What I've tried:
+- Battery tested good (12.6V, 650 CCA)
+- Terminals are clean and tight
+- Checked starter relay — clicks when activated
+
+Any history codes in freeze frame data that might help narrow it down?</p>
+            </div>
+          </div>
+
+          <div class="mt-4 bg-blue-500/10 border border-blue-500/30 rounded-xl p-4">
+            <p class="text-blue-300 text-sm">
+              <strong>💡 Key info provided:</strong> Frequency, conditions (cold/morning), behavior (single click vs no click vs grinding), what's been ruled out, and asking about freeze frame data.
+            </p>
+          </div>
+        </div>
+
+        <!-- AI Response -->
+        <div class="mb-10">
+          <h2 class="text-2xl font-bold text-white mb-4 flex items-center">
+            <span class="w-8 h-8 bg-brand-blue rounded-full flex items-center justify-center text-sm font-bold text-white mr-3">2</span>
+            AI Response
+          </h2>
+          
+          <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+            <div class="bg-slate-800 px-4 py-2 text-xs text-slate-400 border-b border-slate-700 flex items-center">
+              <svg class="w-4 h-4 text-brand-blue mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+              </svg>
+              Autotech AI
+            </div>
+            <div class="p-5 space-y-4">
+              
+              <p class="text-slate-300">
+                Classic intermittent no-crank pattern. The key clues: <strong class="text-white">single click</strong>, <strong class="text-white">worse when cold</strong>, <strong class="text-white">works after waiting</strong>. This points to a few specific causes:
+              </p>
+
+              <div>
+                <h4 class="font-bold text-white text-sm uppercase tracking-wider mb-2">Most Likely: Starter Solenoid</h4>
+                <p class="text-slate-300 mb-3">
+                  The "click then works later" pattern is textbook <strong class="text-brand-accent">starter solenoid contact wear</strong>. When cold, the copper contacts inside the solenoid don't make good connection. As ambient temperature rises (or repeated attempts heat it up), it makes contact.
+                </p>
+                <p class="text-slate-300">
+                  On the 2017 Altima 2.5L, the starter is known to fail this way around 80-100K miles.
+                </p>
+              </div>
+
+              <div>
+                <h4 class="font-bold text-white text-sm uppercase tracking-wider mb-2">Also Consider:</h4>
+                <ul class="text-slate-300 space-y-2 ml-4">
+                  <li>• <strong class="text-white">Starter ground circuit</strong> — Corroded ground strap between engine and body/frame</li>
+                  <li>• <strong class="text-white">Ignition switch contacts</strong> — Less likely since relay clicks</li>
+                  <li>• <strong class="text-white">Neutral safety switch</strong> — Try shifting to neutral when it won't start</li>
+                </ul>
+              </div>
+
+              <div class="bg-brand-blue/10 border border-brand-blue/30 rounded-lg p-4">
+                <h4 class="font-bold text-brand-blue text-sm uppercase tracking-wider mb-2">Diagnostic Test (Next Time It Happens):</h4>
+                <ol class="text-slate-300 space-y-2 list-decimal list-inside">
+                  <li><strong class="text-white">Tap test:</strong> Have someone turn the key while you tap the starter body with a hammer. If it starts, the solenoid contacts are worn.</li>
+                  <li><strong class="text-white">Voltage drop test:</strong> Measure voltage at the starter "S" terminal while cranking. Should be near battery voltage. If it's low, trace the circuit back.</li>
+                  <li><strong class="text-white">Bypass test:</strong> Jump 12V directly to the starter solenoid S terminal. If it cranks, the issue is upstream (switch, relay, wiring).</li>
+                </ol>
+              </div>
+
+              <div>
+                <h4 class="font-bold text-white text-sm uppercase tracking-wider mb-2">Freeze Frame Note:</h4>
+                <p class="text-slate-300">
+                  Intermittent no-cranks typically don't set DTCs or freeze frame data since the PCM doesn't power up during a no-crank. However, check for any <strong class="text-brand-accent">U-codes (communication)</strong> or <strong class="text-brand-accent">B-codes (body)</strong> that might indicate a wiring/ground issue.
+                </p>
+              </div>
+
+              <div class="border-t border-slate-800 pt-4">
+                <h4 class="font-bold text-white text-sm uppercase tracking-wider mb-2">Recommendation:</h4>
+                <p class="text-slate-300">
+                  Given the mileage and symptom pattern, I'd lean toward <strong class="text-brand-accent">replacing the starter</strong>. On this car, it's about a 1-hour job. Use an OE or quality reman unit — cheap starters often have the same solenoid issue out of the box.
+                </p>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- Key Details for Intermittents -->
+        <div class="mb-10">
+          <h2 class="text-2xl font-bold text-white mb-4">Key Details for Intermittent Problems</h2>
+          
+          <div class="grid md:grid-cols-2 gap-4">
+            <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-4">
+              <div class="text-2xl mb-2">🕐</div>
+              <h4 class="font-bold text-white mb-1">When Does It Happen?</h4>
+              <ul class="text-slate-400 text-sm space-y-1">
+                <li>• Time of day?</li>
+                <li>• After sitting how long?</li>
+                <li>• Cold start vs warm?</li>
+                <li>• How often?</li>
+              </ul>
+            </div>
+            <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-4">
+              <div class="text-2xl mb-2">🌡️</div>
+              <h4 class="font-bold text-white mb-1">Environmental Conditions</h4>
+              <ul class="text-slate-400 text-sm space-y-1">
+                <li>• Hot days? Cold days?</li>
+                <li>• Rainy/humid weather?</li>
+                <li>• After washing the car?</li>
+                <li>• On rough roads?</li>
+              </ul>
+            </div>
+            <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-4">
+              <div class="text-2xl mb-2">🔄</div>
+              <h4 class="font-bold text-white mb-1">Operating Conditions</h4>
+              <ul class="text-slate-400 text-sm space-y-1">
+                <li>• Under acceleration? Braking?</li>
+                <li>• Turning left or right?</li>
+                <li>• At certain speeds?</li>
+                <li>• With A/C on? Lights on?</li>
+              </ul>
+            </div>
+            <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-4">
+              <div class="text-2xl mb-2">🔧</div>
+              <h4 class="font-bold text-white mb-1">What Makes It Better/Worse?</h4>
+              <ul class="text-slate-400 text-sm space-y-1">
+                <li>• Wiggling wires?</li>
+                <li>• Waiting a few minutes?</li>
+                <li>• Repeated attempts?</li>
+                <li>• Tapping components?</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pro Tips -->
+        <div class="mb-10 bg-slate-900/50 border border-slate-800 rounded-xl p-5">
+          <h3 class="font-bold text-white mb-3">🔥 Pro Tips for Intermittents</h3>
+          <ul class="text-slate-300 space-y-3">
+            <li>
+              <strong class="text-white">1. Keep a log:</strong> Have the customer note date, time, weather, and conditions every time it happens. Patterns emerge.
+            </li>
+            <li>
+              <strong class="text-white">2. Check pending/history codes:</strong> Even if there's no current code, Mode $07 pending codes or Mode $0A history codes might reveal clues.
+            </li>
+            <li>
+              <strong class="text-white">3. Heat gun / freeze spray:</strong> If you suspect a temp-related issue, use a heat gun to warm suspected components or freeze spray to cool them while monitoring behavior.
+            </li>
+            <li>
+              <strong class="text-white">4. Wiggle test:</strong> With the engine running or key on, wiggle connectors and harnesses while watching PIDs or for symptom changes.
+            </li>
+          </ul>
+        </div>
+
+        <!-- Try It Box -->
+        <div class="bg-gradient-to-r from-brand-blue/20 to-brand-accent/20 border border-brand-blue/30 rounded-2xl p-8 text-center">
+          <h2 class="text-2xl font-bold text-white mb-4">Try It Yourself</h2>
+          <p class="text-slate-300 mb-6">Got an intermittent that's driving you crazy? Describe the pattern and let's troubleshoot.</p>
+          <a href="/auth" class="inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-full text-white bg-brand-blue hover:bg-cyan-600 transition-all">
+            Start Diagnosis
+          </a>
+        </div>
+
+        <!-- Navigation -->
+        <div class="mt-12 flex justify-between">
+          <a href="specs-procedures.html" class="text-slate-400 hover:text-white transition-colors flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+            Procedures
+          </a>
+          <a href="/examples/" class="text-brand-blue hover:text-brand-accent transition-colors flex items-center">
+            Back to All Examples
+            <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </a>
+        </div>
+
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800 py-8">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-slate-500 text-sm">
+        <p>&copy; 2026 Autotech AI. All rights reserved.</p>
+      </div>
+    </footer>
+
+  </body>
+</html>

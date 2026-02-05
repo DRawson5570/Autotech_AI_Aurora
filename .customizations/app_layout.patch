@@ -1,0 +1,136 @@
+diff --git a/src/routes/(app)/+layout.svelte b/src/routes/(app)/+layout.svelte
+index a43665a..335528e 100644
+--- a/src/routes/(app)/+layout.svelte
++++ b/src/routes/(app)/+layout.svelte
+@@ -13,6 +13,7 @@
+ 	import { getTools } from '$lib/apis/tools';
+ 	import { getBanners } from '$lib/apis/configs';
+ 	import { getUserSettings } from '$lib/apis/users';
++	import { confirmCheckoutSession } from '$lib/apis/billing';
+ 
+ 	import { WEBUI_VERSION } from '$lib/constants';
+ 	import { compareVersion } from '$lib/utils';
+@@ -141,6 +142,15 @@
+ 		tools.set(toolsData);
+ 	};
+ 
++	const checkForVersionUpdates = async () => {
++		version = await getVersionUpdates(localStorage.token).catch(() => {
++			return {
++				current: WEBUI_VERSION,
++				latest: WEBUI_VERSION
++			};
++		});
++	};
++
+ 	onMount(async () => {
+ 		if ($user === undefined || $user === null) {
+ 			await goto('/auth');
+@@ -150,15 +160,48 @@
+ 			return;
+ 		}
+ 
+-		clearChatInputStorage();
+-		await Promise.all([
+-			checkLocalDBChats(),
+-			setBanners(),
+-			setTools(),
+-			setUserSettings(async () => {
+-				await Promise.all([setModels(), setToolServers()]);
+-			})
+-		]);
++		try {
++			// Stripe Checkout fallback confirmation (for environments where webhooks can't reach the server).
++			try {
++				const params = new URLSearchParams(window.location.search);
++				const checkoutSuccess = params.get('checkout_success');
++				const sessionId = params.get('session_id');
++				const purchaseId = params.get('purchase_id');
++				const authToken = localStorage?.token ?? $user?.token;
++				if (checkoutSuccess === '1' && (sessionId || purchaseId) && authToken) {
++					const confirmRes = await confirmCheckoutSession(
++						{ session_id: sessionId, purchase_id: purchaseId },
++						authToken
++					);
++					try {
++						window.dispatchEvent(
++							new CustomEvent('billing:balance-updated', {
++								detail: { tokens_balance: confirmRes?.tokens_balance }
++							})
++						);
++					} catch {
++						// ignore
++					}
++					params.delete('checkout_success');
++					params.delete('session_id');
++					params.delete('purchase_id');
++					params.delete('checkout_canceled');
++					const qs = params.toString();
++					window.history.replaceState({}, '', `${window.location.pathname}${qs ? `?${qs}` : ''}`);
++				}
++			} catch {
++				// Non-fatal: UI can still load and show current balance.
++			}
++
++			clearChatInputStorage();
++			await Promise.all([
++				checkLocalDBChats(),
++				setBanners(),
++				setTools(),
++				setUserSettings(async () => {
++					await Promise.all([setModels(), setToolServers()]);
++				})
++			]);
+ 
+ 		// Helper function to check if the pressed keys match the shortcut definition
+ 		const isShortcutMatch = (event: KeyboardEvent, shortcut): boolean => {
+@@ -272,33 +315,28 @@
+ 			}
+ 		}
+ 
+-		// Check for version updates
+-		if ($user?.role === 'admin' && $config?.features?.enable_version_update_check) {
+-			// Check if the user has dismissed the update toast in the last 24 hours
+-			if (localStorage.dismissedUpdateToast) {
+-				const dismissedUpdateToast = new Date(Number(localStorage.dismissedUpdateToast));
+-				const now = new Date();
++			// Check for version updates
++			if ($user?.role === 'admin' && $config?.features?.enable_version_update_check) {
++				// Check if the user has dismissed the update toast in the last 24 hours
++				if (localStorage.dismissedUpdateToast) {
++					const dismissedUpdateToast = new Date(Number(localStorage.dismissedUpdateToast));
++					const now = new Date();
+ 
+-				if (now - dismissedUpdateToast > 24 * 60 * 60 * 1000) {
++					if (now - dismissedUpdateToast > 24 * 60 * 60 * 1000) {
++						checkForVersionUpdates();
++					}
++				} else {
+ 					checkForVersionUpdates();
+ 				}
+-			} else {
+-				checkForVersionUpdates();
+ 			}
++		} catch (error) {
++			console.error('Error during onMount:', error);
++			toast.error($i18n.t('Failed to load app'));
++		} finally {
++			await tick();
++			loaded = true;
+ 		}
+-		await tick();
+-
+-		loaded = true;
+ 	});
+-
+-	const checkForVersionUpdates = async () => {
+-		version = await getVersionUpdates(localStorage.token).catch((error) => {
+-			return {
+-				current: WEBUI_VERSION,
+-				latest: WEBUI_VERSION
+-			};
+-		});
+-	};
+ </script>
+ 
+ <SettingsModal bind:show={$showSettings} />

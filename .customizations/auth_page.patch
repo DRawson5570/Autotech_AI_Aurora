@@ -1,0 +1,94 @@
+diff --git a/src/routes/auth/+page.svelte b/src/routes/auth/+page.svelte
+index 9de2d8d..684a41d 100644
+--- a/src/routes/auth/+page.svelte
++++ b/src/routes/auth/+page.svelte
+@@ -9,18 +9,12 @@
+ 	import { page } from '$app/stores';
+ 
+ 	import { getBackendConfig } from '$lib/apis';
+-	import {
+-		ldapUserSignIn,
+-		getSessionUser,
+-		userSignIn,
+-		userSignUp,
+-		updateUserTimezone
+-	} from '$lib/apis/auths';
++	import { ldapUserSignIn, getSessionUser, userSignIn, userSignUp } from '$lib/apis/auths';
+ 
+ 	import { WEBUI_API_BASE_URL, WEBUI_BASE_URL } from '$lib/constants';
+ 	import { WEBUI_NAME, config, user, socket } from '$lib/stores';
+ 
+-	import { generateInitialsImage, canvasPixelTest, getUserTimezone } from '$lib/utils';
++	import { generateInitialsImage, canvasPixelTest } from '$lib/utils';
+ 
+ 	import Spinner from '$lib/components/common/Spinner.svelte';
+ 	import OnBoarding from '$lib/components/OnBoarding.svelte';
+@@ -53,17 +47,61 @@
+ 			await user.set(sessionUser);
+ 			await config.set(await getBackendConfig());
+ 
+-			// Update user timezone
+-			const timezone = getUserTimezone();
+-			if (sessionUser.token && timezone) {
+-				updateUserTimezone(sessionUser.token, timezone);
+-			}
+-
+ 			if (!redirectPath) {
+ 				redirectPath = $page.url.searchParams.get('redirect') || '/';
+ 			}
+ 
+-			goto(redirectPath);
++			// Attempt to ensure the client loads a fresh SPA shell after login.
++			let swCount = 0;
++			let cacheCount = 0;
++			try {
++				// Unregister service workers and clear caches to avoid stale cached shells
++				if ('serviceWorker' in navigator && navigator.serviceWorker.getRegistrations) {
++					const regs = await navigator.serviceWorker.getRegistrations();
++					swCount = regs.length;
++					await Promise.all(regs.map(r => r.unregister().catch(() => false)));
++				}
++				if ('caches' in window && caches.keys) {
++					const keys = await caches.keys();
++					cacheCount = keys.length;
++					await Promise.all(keys.map(k => caches.delete(k).catch(() => false)));
++				}
++			} catch (e) {
++				console.warn('Recovery attempt during login failed', e);
++			}
++
++			// Send lightweight login telemetry (non-blocking) so server can correlate login state.
++			try {
++				const payload = {
++					ts: Date.now(),
++					redirectPath,
++					swCount,
++					cacheCount,
++					tokenPresent: !!sessionUser.token,
++					userAgent: navigator.userAgent,
++					runId: sessionStorage.getItem('owui_run_id') || null,
++				};
++				const body = JSON.stringify(payload);
++				if (navigator.sendBeacon) {
++					try {
++						navigator.sendBeacon('/_debug/client-login', new Blob([body], { type: 'application/json' }));
++					} catch (e) {
++						// Fall back to fetch with keepalive
++						fetch('/_debug/client-login', { method: 'POST', body, keepalive: true, headers: { 'Content-Type': 'application/json' } }).catch(() => {});
++					}
++				} else {
++					fetch('/_debug/client-login', { method: 'POST', body, keepalive: true, headers: { 'Content-Type': 'application/json' } }).catch(() => {});
++				}
++			} catch (e) {
++				// Non-fatal telemetry failure
++				console.debug('client-login telemetry failed', e);
++			}
++
++			// Force a full navigation with a cache-busting param so the browser fetches a fresh index.
++			const ts = Date.now();
++			const sep = redirectPath.includes('?') ? '&' : '?';
++			window.location.assign(`${redirectPath}${sep}_fresh=${ts}`);
++
+ 			localStorage.removeItem('redirectPath');
+ 		}
+ 	};

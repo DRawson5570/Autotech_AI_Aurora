@@ -1,0 +1,735 @@
+diff --git a/backend/open_webui/main.py b/backend/open_webui/main.py
+index 82a87e3..c251cc1 100644
+--- a/backend/open_webui/main.py
++++ b/backend/open_webui/main.py
+@@ -93,8 +93,27 @@ from open_webui.routers import (
+     users,
+     utils,
+     scim,
++    google,
++    mitchell,
+ )
+ 
++# Ensure billing module is explicitly imported so its router is available (namespace package won't auto-import submodules reliably)
++try:
++    import importlib
++
++    billing = importlib.import_module("open_webui.routers.billing")
++except Exception as e:
++    import logging as _l
++
++    _l.getLogger(__name__).exception("Failed to import billing router: %s", e)
++
++# Debug: confirm billing import completed
++import logging as _logging_for_billing_check
++_blg = _logging_for_billing_check.getLogger(__name__)
++_blg.info("billing imported in module globals: %s", 'billing' in globals())
++if 'billing' in globals():
++    _blg.info("billing object present: %s, has router: %s", repr(billing), hasattr(billing, 'router'))
++
+ from open_webui.routers.retrieval import (
+     get_embedding_function,
+     get_reranking_function,
+@@ -102,9 +121,7 @@ from open_webui.routers.retrieval import (
+     get_rf,
+ )
+ 
+-
+-from sqlalchemy.orm import Session
+-from open_webui.internal.db import ScopedSession, engine, get_session
++from open_webui.internal.db import Session, engine
+ 
+ from open_webui.models.functions import Functions
+ from open_webui.models.models import Models
+@@ -121,8 +138,15 @@ from open_webui.config import (
+     OPENAI_API_BASE_URLS,
+     OPENAI_API_KEYS,
+     OPENAI_API_CONFIGS,
++    # Google
++    ENABLE_GOOGLE_API,
++    GOOGLE_API_BASE_URLS,
++    GOOGLE_API_KEYS,
++    MODEL_PROVIDER_CREDENTIALS,
+     # Direct Connections
+     ENABLE_DIRECT_CONNECTIONS,
++    # Billing
++    BILLING_TOKEN_USD_RATE,
+     # Model list
+     ENABLE_BASE_MODELS_CACHE,
+     # Thread pool size for FastAPI/AnyIO
+@@ -145,7 +169,6 @@ from open_webui.config import (
+     CODE_INTERPRETER_JUPYTER_AUTH_TOKEN,
+     CODE_INTERPRETER_JUPYTER_AUTH_PASSWORD,
+     CODE_INTERPRETER_JUPYTER_TIMEOUT,
+-    ENABLE_MEMORIES,
+     # Image
+     AUTOMATIC1111_API_AUTH,
+     AUTOMATIC1111_BASE_URL,
+@@ -209,7 +232,6 @@ from open_webui.config import (
+     PLAYWRIGHT_TIMEOUT,
+     FIRECRAWL_API_BASE_URL,
+     FIRECRAWL_API_KEY,
+-    FIRECRAWL_TIMEOUT,
+     WEB_LOADER_ENGINE,
+     WEB_LOADER_CONCURRENT_REQUESTS,
+     WEB_LOADER_TIMEOUT,
+@@ -254,7 +276,6 @@ from open_webui.config import (
+     RAG_OLLAMA_BASE_URL,
+     RAG_OLLAMA_API_KEY,
+     CHUNK_OVERLAP,
+-    CHUNK_MIN_SIZE_TARGET,
+     CHUNK_SIZE,
+     CONTENT_EXTRACTION_ENGINE,
+     DATALAB_MARKER_API_KEY,
+@@ -285,7 +306,6 @@ from open_webui.config import (
+     MISTRAL_OCR_API_BASE_URL,
+     MISTRAL_OCR_API_KEY,
+     RAG_TEXT_SPLITTER,
+-    ENABLE_MARKDOWN_HEADER_TEXT_SPLITTER,
+     TIKTOKEN_ENCODING_NAME,
+     PDF_EXTRACT_IMAGES,
+     YOUTUBE_LOADER_LANGUAGE,
+@@ -301,7 +321,6 @@ from open_webui.config import (
+     WEB_SEARCH_DOMAIN_FILTER_LIST,
+     OLLAMA_CLOUD_WEB_SEARCH_API_KEY,
+     JINA_API_KEY,
+-    JINA_API_BASE_URL,
+     SEARCHAPI_API_KEY,
+     SEARCHAPI_ENGINE,
+     SERPAPI_API_KEY,
+@@ -313,7 +332,6 @@ from open_webui.config import (
+     YACY_PASSWORD,
+     SERPER_API_KEY,
+     SERPLY_API_KEY,
+-    DDGS_BACKEND,
+     SERPSTACK_API_KEY,
+     SERPSTACK_HTTPS,
+     TAVILY_API_KEY,
+@@ -366,10 +384,8 @@ from open_webui.config import (
+     ENABLE_API_KEYS_ENDPOINT_RESTRICTIONS,
+     API_KEYS_ALLOWED_ENDPOINTS,
+     ENABLE_FOLDERS,
+-    FOLDER_MAX_FILE_COUNT,
+     ENABLE_CHANNELS,
+     ENABLE_NOTES,
+-    ENABLE_USER_STATUS,
+     ENABLE_COMMUNITY_SHARING,
+     ENABLE_MESSAGE_RATING,
+     ENABLE_USER_WEBHOOKS,
+@@ -486,10 +502,6 @@ from open_webui.env import (
+     AIOHTTP_CLIENT_SESSION_SSL,
+     ENABLE_STAR_SESSIONS_MIDDLEWARE,
+     ENABLE_PUBLIC_ACTIVE_USERS_COUNT,
+-    # Admin Account Runtime Creation
+-    WEBUI_ADMIN_EMAIL,
+-    WEBUI_ADMIN_PASSWORD,
+-    WEBUI_ADMIN_NAME,
+ )
+ 
+ 
+@@ -514,7 +526,6 @@ from open_webui.utils.auth import (
+     decode_token,
+     get_admin_user,
+     get_verified_user,
+-    create_admin_user,
+ )
+ from open_webui.utils.plugin import install_tool_and_function_dependencies
+ from open_webui.utils.oauth import (
+@@ -587,18 +598,18 @@ async def lifespan(app: FastAPI):
+     app.state.instance_id = INSTANCE_ID
+     start_logger()
+ 
++    # Ensure billing router registered early so it doesn't get delayed by other startup tasks
++    try:
++        await ensure_billing_router_registered()
++    except Exception:
++        log.exception("Failed to ensure billing router during early lifespan startup")
++
+     if RESET_CONFIG_ON_START:
+         reset_config()
+ 
+     if LICENSE_KEY:
+         get_license_data(app, LICENSE_KEY)
+ 
+-    # Create admin account from env vars if specified and no users exist
+-    if WEBUI_ADMIN_EMAIL and WEBUI_ADMIN_PASSWORD:
+-        if create_admin_user(WEBUI_ADMIN_EMAIL, WEBUI_ADMIN_PASSWORD, WEBUI_ADMIN_NAME):
+-            # Disable signup since we now have an admin
+-            app.state.config.ENABLE_SIGNUP = False
+-
+     # This should be blocking (sync) so functions are not deactivated on first /get_models calls
+     # when the first user lands on the / route.
+     log.info("Installing external dependencies of functions and tools...")
+@@ -645,6 +656,12 @@ async def lifespan(app: FastAPI):
+             None,
+         )
+ 
++    # Ensure billing router is registered at startup (lifespan)
++    try:
++        await ensure_billing_router_registered()
++    except Exception:
++        log.exception("Failed to ensure billing router during lifespan startup")
++
+     yield
+ 
+     if hasattr(app.state, "redis_task_command_listener"):
+@@ -677,6 +694,10 @@ app.state.config = AppConfig(
+ app.state.redis = None
+ 
+ app.state.WEBUI_NAME = WEBUI_NAME
++# Optional user-facing display name (e.g., white-label for regular users) pulled from env
++from open_webui.env import USER_WEBUI_NAME, MODEL_ALIASES
++app.state.USER_WEBUI_NAME = USER_WEBUI_NAME
++app.state.MODEL_ALIASES = MODEL_ALIASES
+ app.state.LICENSE_METADATA = None
+ 
+ 
+@@ -718,6 +739,56 @@ app.state.config.OPENAI_API_CONFIGS = OPENAI_API_CONFIGS
+ 
+ app.state.OPENAI_MODELS = {}
+ 
++########################################
++#
++# GOOGLE
++#
++########################################
++app.state.config.ENABLE_GOOGLE_API = ENABLE_GOOGLE_API
++app.state.config.GOOGLE_API_BASE_URLS = GOOGLE_API_BASE_URLS
++app.state.config.GOOGLE_API_KEYS = GOOGLE_API_KEYS
++app.state.GOOGLE_MODELS = {}
++# Ensure persisted model-provider credentials are available on app.state.config
++app.state.config.MODEL_PROVIDER_CREDENTIALS = MODEL_PROVIDER_CREDENTIALS
++
++# Jerry‑rig: load an API key from a local file (~/gary_gemini_api_key) at startup
++# and persist it into MODEL_PROVIDER_CREDENTIALS (encrypted) and GOOGLE_API_KEYS for
++# quick testing. This is temporary—remove when proper credential management is in place.
++try:
++    import os
++    key_path = os.path.expanduser('~/gary_gemini_api_key')
++    if os.path.exists(key_path):
++        with open(key_path, 'r') as f:
++            _key = f.read().strip()
++        if _key:
++            try:
++                # update encrypted provider credentials
++                creds = getattr(app.state.config, 'MODEL_PROVIDER_CREDENTIALS', None) or {}
++                creds['google'] = {'api_key_encrypted': encrypt_data({'api_key': _key})}
++                app.state.config.MODEL_PROVIDER_CREDENTIALS = creds
++
++                # Persist encrypted creds only (do NOT write plaintext keys).
++                # Ensure Google is enabled so the key takes effect immediately
++                app.state.config.ENABLE_GOOGLE_API = True
++                log.info('Loaded Google API key from ~/gary_gemini_api_key and persisted to config (encrypted)')
++            except Exception as e:
++                log.exception(f'Failed to persist Google API key from {key_path}: {e}')
++except Exception:
++    # Best effort only — do not prevent startup
++    log.exception('Unexpected error while loading jerry-rig Google API key (non-fatal)')
++
++# Jerry‑rig: force Ollama base URL to localhost:11434 and persist it so tests and local dev
++# can assume a running Ollama instance at the local address. This is intentionally a
++# short-term, developer-only convenience; remove when you add a proper config flow.
++try:
++    ollama_default = ['http://localhost:11434']
++    # Apply and persist
++    app.state.config.OLLAMA_BASE_URLS = ollama_default
++    app.state.config.ENABLE_OLLAMA_API = True
++    log.info('Forced OLLAMA_BASE_URLS to http://localhost:11434 (jerry-rig)')
++except Exception as e:
++    log.exception(f'Failed to set jerry-rig Ollama URL: {e}')
++
+ ########################################
+ #
+ # TOOL SERVERS
+@@ -735,6 +806,14 @@ app.state.TOOL_SERVERS = []
+ 
+ app.state.config.ENABLE_DIRECT_CONNECTIONS = ENABLE_DIRECT_CONNECTIONS
+ 
++########################################
++#
++# BILLING
++#
++########################################
++
++app.state.config.BILLING_TOKEN_USD_RATE = BILLING_TOKEN_USD_RATE
++
+ ########################################
+ #
+ # SCIM
+@@ -795,13 +874,11 @@ app.state.config.BANNERS = WEBUI_BANNERS
+ 
+ 
+ app.state.config.ENABLE_FOLDERS = ENABLE_FOLDERS
+-app.state.config.FOLDER_MAX_FILE_COUNT = FOLDER_MAX_FILE_COUNT
+ app.state.config.ENABLE_CHANNELS = ENABLE_CHANNELS
+ app.state.config.ENABLE_NOTES = ENABLE_NOTES
+ app.state.config.ENABLE_COMMUNITY_SHARING = ENABLE_COMMUNITY_SHARING
+ app.state.config.ENABLE_MESSAGE_RATING = ENABLE_MESSAGE_RATING
+ app.state.config.ENABLE_USER_WEBHOOKS = ENABLE_USER_WEBHOOKS
+-app.state.config.ENABLE_USER_STATUS = ENABLE_USER_STATUS
+ 
+ app.state.config.ENABLE_EVALUATION_ARENA_MODELS = ENABLE_EVALUATION_ARENA_MODELS
+ app.state.config.EVALUATION_ARENA_MODELS = EVALUATION_ARENA_MODELS
+@@ -909,17 +986,11 @@ app.state.config.MINERU_API_TIMEOUT = MINERU_API_TIMEOUT
+ app.state.config.MINERU_PARAMS = MINERU_PARAMS
+ 
+ app.state.config.TEXT_SPLITTER = RAG_TEXT_SPLITTER
+-app.state.config.ENABLE_MARKDOWN_HEADER_TEXT_SPLITTER = (
+-    ENABLE_MARKDOWN_HEADER_TEXT_SPLITTER
+-)
+-
+ app.state.config.TIKTOKEN_ENCODING_NAME = TIKTOKEN_ENCODING_NAME
+ 
+ app.state.config.CHUNK_SIZE = CHUNK_SIZE
+-app.state.config.CHUNK_MIN_SIZE_TARGET = CHUNK_MIN_SIZE_TARGET
+ app.state.config.CHUNK_OVERLAP = CHUNK_OVERLAP
+ 
+-
+ app.state.config.RAG_EMBEDDING_ENGINE = RAG_EMBEDDING_ENGINE
+ app.state.config.RAG_EMBEDDING_MODEL = RAG_EMBEDDING_MODEL
+ app.state.config.RAG_EMBEDDING_BATCH_SIZE = RAG_EMBEDDING_BATCH_SIZE
+@@ -984,14 +1055,12 @@ app.state.config.SERPSTACK_API_KEY = SERPSTACK_API_KEY
+ app.state.config.SERPSTACK_HTTPS = SERPSTACK_HTTPS
+ app.state.config.SERPER_API_KEY = SERPER_API_KEY
+ app.state.config.SERPLY_API_KEY = SERPLY_API_KEY
+-app.state.config.DDGS_BACKEND = DDGS_BACKEND
+ app.state.config.TAVILY_API_KEY = TAVILY_API_KEY
+ app.state.config.SEARCHAPI_API_KEY = SEARCHAPI_API_KEY
+ app.state.config.SEARCHAPI_ENGINE = SEARCHAPI_ENGINE
+ app.state.config.SERPAPI_API_KEY = SERPAPI_API_KEY
+ app.state.config.SERPAPI_ENGINE = SERPAPI_ENGINE
+ app.state.config.JINA_API_KEY = JINA_API_KEY
+-app.state.config.JINA_API_BASE_URL = JINA_API_BASE_URL
+ app.state.config.BING_SEARCH_V7_ENDPOINT = BING_SEARCH_V7_ENDPOINT
+ app.state.config.BING_SEARCH_V7_SUBSCRIPTION_KEY = BING_SEARCH_V7_SUBSCRIPTION_KEY
+ app.state.config.EXA_API_KEY = EXA_API_KEY
+@@ -1011,7 +1080,6 @@ app.state.config.PLAYWRIGHT_WS_URL = PLAYWRIGHT_WS_URL
+ app.state.config.PLAYWRIGHT_TIMEOUT = PLAYWRIGHT_TIMEOUT
+ app.state.config.FIRECRAWL_API_BASE_URL = FIRECRAWL_API_BASE_URL
+ app.state.config.FIRECRAWL_API_KEY = FIRECRAWL_API_KEY
+-app.state.config.FIRECRAWL_TIMEOUT = FIRECRAWL_TIMEOUT
+ app.state.config.TAVILY_EXTRACT_DEPTH = TAVILY_EXTRACT_DEPTH
+ 
+ app.state.EMBEDDING_FUNCTION = None
+@@ -1120,7 +1188,6 @@ app.state.config.CODE_INTERPRETER_JUPYTER_TIMEOUT = CODE_INTERPRETER_JUPYTER_TIM
+ app.state.config.IMAGE_GENERATION_ENGINE = IMAGE_GENERATION_ENGINE
+ app.state.config.ENABLE_IMAGE_GENERATION = ENABLE_IMAGE_GENERATION
+ app.state.config.ENABLE_IMAGE_PROMPT_GENERATION = ENABLE_IMAGE_PROMPT_GENERATION
+-app.state.config.ENABLE_MEMORIES = ENABLE_MEMORIES
+ 
+ app.state.config.IMAGE_GENERATION_MODEL = IMAGE_GENERATION_MODEL
+ app.state.config.IMAGE_SIZE = IMAGE_SIZE
+@@ -1174,6 +1241,7 @@ app.state.config.STT_OPENAI_API_BASE_URL = AUDIO_STT_OPENAI_API_BASE_URL
+ app.state.config.STT_OPENAI_API_KEY = AUDIO_STT_OPENAI_API_KEY
+ 
+ app.state.config.WHISPER_MODEL = WHISPER_MODEL
++app.state.config.WHISPER_VAD_FILTER = WHISPER_VAD_FILTER
+ app.state.config.DEEPGRAM_API_KEY = DEEPGRAM_API_KEY
+ 
+ app.state.config.AUDIO_STT_AZURE_API_KEY = AUDIO_STT_AZURE_API_KEY
+@@ -1356,7 +1424,7 @@ app.add_middleware(APIKeyRestrictionMiddleware)
+ async def commit_session_after_request(request: Request, call_next):
+     response = await call_next(request)
+     # log.debug("Commit session after request")
+-    ScopedSession.commit()
++    Session.commit()
+     return response
+ 
+ 
+@@ -1400,18 +1468,78 @@ app.add_middleware(
+     allow_headers=["*"],
+ )
+ 
++# DEBUG: If DEBUG_GOOGLE_SAVE=1 is set, log incoming google credential save requests
++if os.environ.get('DEBUG_GOOGLE_SAVE', '0') == '1':
++    @app.middleware("http")
++    async def debug_google_credentials(request, call_next):
++        try:
++            if request.url.path.startswith("/api/v1/google"):
++                body = await request.body()
++                # Restore body for downstream consumers
++                request._body = body
++                log.info(f"DEBUG_GOOGLE_INCOMING method={request.method} path={request.url.path} headers={dict(request.headers)} body={body[:1024]!r}")
++        except Exception as e:
++            log.exception("Failed to log google debug middleware")
++        return await call_next(request)
++
+ 
+ app.mount("/ws", socket_app)
+ 
+ 
+ app.include_router(ollama.router, prefix="/ollama", tags=["ollama"])
+ app.include_router(openai.router, prefix="/openai", tags=["openai"])
++app.include_router(google.router, prefix="/api/v1/google", tags=["google"])
+ 
+ 
+ app.include_router(pipelines.router, prefix="/api/v1/pipelines", tags=["pipelines"])
+ app.include_router(tasks.router, prefix="/api/v1/tasks", tags=["tasks"])
+ app.include_router(images.router, prefix="/api/v1/images", tags=["images"])
+ 
++# Mitchell Agent API - request/result queue for remote polling agents
++try:
++    from addons.mitchell_agent.server import router as mitchell_router
++    app.include_router(mitchell_router, tags=["mitchell"])
++    log.info("Mitchell Agent router registered")
++except ImportError as e:
++    log.warning(f"Mitchell Agent router not available: {e}")
++
++# Include billing router only if it was successfully imported during module import; otherwise lifespan will register it
++if 'billing' in globals() and hasattr(billing, 'router'):
++    app.include_router(billing.router, prefix="/api/v1/billing", tags=["billing"])
++else:
++    log.info("Billing router not present at import time; deferring registration to lifespan startup")
++
++# Debug: log billing routes to verify they are registered and visible in OpenAPI
++log.info("Billing routes at startup: %s", [getattr(r, 'path', None) for r in app.routes if getattr(r, 'path', '').startswith('/api/v1/billing')])
++
++# Ensure billing router helper (no decorator) so it can be called by the lifespan handler
++async def ensure_billing_router_registered():
++    print("DEBUG: ensure_billing_router_registered START")
++    try:
++        if not any(getattr(r, "path", "").startswith("/api/v1/billing") for r in app.routes):
++            print("DEBUG: No billing routes present, attempting import of open_webui.routers.billing")
++            import importlib
++
++            _billing = importlib.import_module("open_webui.routers.billing")
++            if hasattr(_billing, "router"):
++                app.include_router(_billing.router, prefix="/api/v1/billing", tags=["billing"])
++                print("DEBUG: Billing router dynamically registered during startup.")
++                log.info("Billing router dynamically registered during startup.")
++            else:
++                print("DEBUG: Billing module imported but no 'router' attribute found.")
++                log.warning("Billing module imported but no 'router' attribute found.")
++        else:
++            print("DEBUG: Billing router already present at startup.")
++            log.info("Billing router already present at startup.")
++
++        # Log final state of billing routes
++        routes = [getattr(r, 'path', None) for r in app.routes if getattr(r, 'path', '').startswith('/api/v1/billing')]
++        print(f"DEBUG: Billing routes after startup check: {routes}")
++        log.info("Billing routes after startup check: %s", routes)
++    except Exception as e:
++        print("DEBUG: Exception in ensure_billing_router_registered:", e)
++        log.exception("Failed to dynamically register billing router during startup")
++
+ app.include_router(audio.router, prefix="/api/v1/audio", tags=["audio"])
+ app.include_router(retrieval.router, prefix="/api/v1/retrieval", tags=["retrieval"])
+ 
+@@ -1436,15 +1564,35 @@ app.include_router(folders.router, prefix="/api/v1/folders", tags=["folders"])
+ app.include_router(groups.router, prefix="/api/v1/groups", tags=["groups"])
+ app.include_router(files.router, prefix="/api/v1/files", tags=["files"])
+ app.include_router(functions.router, prefix="/api/v1/functions", tags=["functions"])
++app.include_router(mitchell.router, prefix="/api/v1/mitchell", tags=["mitchell"])
+ app.include_router(
+     evaluations.router, prefix="/api/v1/evaluations", tags=["evaluations"]
+ )
+ app.include_router(utils.router, prefix="/api/v1/utils", tags=["utils"])
+ 
++# Dev-only test helpers (no prefix)
++from open_webui.routers import test_helpers as _test_helpers
++app.include_router(_test_helpers.router)
++
+ # SCIM 2.0 API for identity management
+ if ENABLE_SCIM:
+     app.include_router(scim.router, prefix="/api/v1/scim/v2", tags=["scim"])
+ 
++# Final attempt to include billing router at module import end in case earlier imports failed
++try:
++    if not any(getattr(r, 'path', '').startswith('/api/v1/billing') for r in app.routes):
++        print('DEBUG: Final import attempt for billing router at module end')
++        import importlib
++
++        _billing = importlib.import_module('open_webui.routers.billing')
++        if hasattr(_billing, 'router'):
++            app.include_router(_billing.router, prefix='/api/v1/billing', tags=['billing'])
++            print('DEBUG: Billing router included at module end')
++        else:
++            print('DEBUG: Billing module imported but no router attribute at module end')
++except Exception as e:
++    print('DEBUG: Final billing import attempt failed at module end:', e)
++
+ 
+ try:
+     audit_level = AuditLevel(AUDIT_LOG_LEVEL)
+@@ -1563,6 +1711,27 @@ async def chat_completion(
+     form_data: dict,
+     user=Depends(get_verified_user),
+ ):
++    # Token enforcement: if a non-admin user has no tokens remaining (or no balance
++    # record yet, which implies a 0 balance), block new completions with guidance.
++    try:
++        if user and getattr(user, "role", None) != "admin":
++            from open_webui.models import billing as _billing
++
++            bal = int(_billing.get_user_balance(user.id) or 0)
++            if bal <= 0:
++                raise HTTPException(
++                    status_code=status.HTTP_402_PAYMENT_REQUIRED,
++                    detail=(
++                        "Your token balance is exhausted. Please purchase more tokens to continue "
++                        "(click ‘Buy Tokens’ in the sidebar or go to Settings → Account → Billing)."
++                    ),
++                )
++    except HTTPException:
++        raise
++    except Exception:
++        # Best-effort only: if billing isn't available, do not block chat.
++        pass
++
+     if not request.app.state.MODELS:
+         await get_all_models(request, user=user)
+ 
+@@ -1677,7 +1846,7 @@ async def chat_completion(
+                     )
+ 
+                 # Insert chat files from parent message if any
+-                parent_message = metadata.get("parent_message") or {}
++                parent_message = metadata.get("parent_message", {})
+                 parent_message_files = parent_message.get("files", [])
+                 if parent_message_files:
+                     try:
+@@ -1911,6 +2080,8 @@ async def get_app_config(request: Request):
+         **({"onboarding": True} if onboarding else {}),
+         "status": True,
+         "name": app.state.WEBUI_NAME,
++        "user_name": getattr(app.state, 'USER_WEBUI_NAME', None),
++        "model_aliases": getattr(app.state, 'MODEL_ALIASES', None),
+         "version": VERSION,
+         "default_locale": str(DEFAULT_LOCALE),
+         "oauth": {
+@@ -1934,7 +2105,6 @@ async def get_app_config(request: Request):
+                 {
+                     "enable_direct_connections": app.state.config.ENABLE_DIRECT_CONNECTIONS,
+                     "enable_folders": app.state.config.ENABLE_FOLDERS,
+-                    "folder_max_file_count": app.state.config.FOLDER_MAX_FILE_COUNT,
+                     "enable_channels": app.state.config.ENABLE_CHANNELS,
+                     "enable_notes": app.state.config.ENABLE_NOTES,
+                     "enable_web_search": app.state.config.ENABLE_WEB_SEARCH,
+@@ -1945,12 +2115,10 @@ async def get_app_config(request: Request):
+                     "enable_community_sharing": app.state.config.ENABLE_COMMUNITY_SHARING,
+                     "enable_message_rating": app.state.config.ENABLE_MESSAGE_RATING,
+                     "enable_user_webhooks": app.state.config.ENABLE_USER_WEBHOOKS,
+-                    "enable_user_status": app.state.config.ENABLE_USER_STATUS,
+                     "enable_admin_export": ENABLE_ADMIN_EXPORT,
+                     "enable_admin_chat_access": ENABLE_ADMIN_CHAT_ACCESS,
+                     "enable_google_drive_integration": app.state.config.ENABLE_GOOGLE_DRIVE_INTEGRATION,
+                     "enable_onedrive_integration": app.state.config.ENABLE_ONEDRIVE_INTEGRATION,
+-                    "enable_memories": app.state.config.ENABLE_MEMORIES,
+                     **(
+                         {
+                             "enable_onedrive_personal": ENABLE_ONEDRIVE_PERSONAL,
+@@ -2315,13 +2483,8 @@ async def oauth_login(provider: str, request: Request):
+ #    - Email addresses are considered unique, so we fail registration if the email address is already taken
+ @app.get("/oauth/{provider}/login/callback")
+ @app.get("/oauth/{provider}/callback")  # Legacy endpoint
+-async def oauth_login_callback(
+-    provider: str,
+-    request: Request,
+-    response: Response,
+-    db: Session = Depends(get_session),
+-):
+-    return await oauth_manager.handle_callback(request, provider, response, db=db)
++async def oauth_login_callback(provider: str, request: Request, response: Response):
++    return await oauth_manager.handle_callback(request, provider, response)
+ 
+ 
+ @app.get("/manifest.json")
+@@ -2378,12 +2541,197 @@ async def healthcheck():
+     return {"status": True}
+ 
+ 
++# Temporary: force clients to fetch a fresh SPA shell once by adding a per-request timestamp
++# This helps bypass stale service-worker cached shells that may be serving old 404 pages.
++@app.get("/app")
++async def app_entry(request: Request):
++    try:
++        # If client already requested a fresh copy, serve index.html directly
++        if "_fresh" in request.query_params:
++            index_path = FRONTEND_BUILD_DIR / "index.html"
++            if index_path.exists():
++                return FileResponse(index_path, media_type="text/html")
++            # Fallback to SPAStaticFiles behavior if index missing
++            return RedirectResponse("/app?_fresh=1")
++        # Otherwise redirect to same path with a short-lived timestamp param to force a network fetch
++        ts = int(time.time())
++        base = str(request.url).split("?")[0]
++        return RedirectResponse(f"{base}?_fresh={ts}")
++    except Exception:
++        # On error, fall back to serving index normally
++        index_path = FRONTEND_BUILD_DIR / "index.html"
++        if index_path.exists():
++            return FileResponse(index_path, media_type="text/html")
++        return RedirectResponse("/app?_fresh=1")
++
++
+ @app.get("/health/db")
+ async def healthcheck_with_db():
+-    ScopedSession.execute(text("SELECT 1;")).all()
++    Session.execute(text("SELECT 1;")).all()
+     return {"status": True}
+ 
+ 
++# Ensure frontend static assets are copied into the backend static dir at startup
++@app.on_event("startup")
++async def copy_frontend_static_to_backend():
++    try:
++        frontend_static = FRONTEND_BUILD_DIR / "static"
++        if frontend_static.exists() and frontend_static.is_dir():
++            for file_path in frontend_static.glob("**/*"):
++                if file_path.is_file():
++                    target_path = STATIC_DIR / file_path.relative_to(frontend_static)
++                    target_path.parent.mkdir(parents=True, exist_ok=True)
++                    try:
++                        shutil.copyfile(file_path, target_path)
++                    except Exception as e:
++                        log.error(f"Error copying static file {file_path}: {e}")
++            log.info("Copied frontend static assets into backend static directory")
++    except Exception as e:
++        log.exception(f"Failed to copy frontend static assets: {e}")
++
++
++# Start background reconcile loop if configured
++@app.on_event("startup")
++async def start_reconcile_scheduler():
++    try:
++        from open_webui.tasks.reconcile import start_background_reconcile
++
++        interval = int(os.environ.get("BILLING_RECONCILE_INTERVAL_SECONDS", "3600"))
++        if interval and interval > 0:
++            # start the background loop; it's resilient to exceptions
++            start_background_reconcile(app, interval)
++            log.info("Billing reconcile scheduler started with interval %s seconds", interval)
++        else:
++            log.info("Billing reconcile scheduler disabled (interval <= 0)")
++    except Exception:
++        log.exception("Failed to start reconcile scheduler")
++
++
++@app.on_event("shutdown")
++async def stop_reconcile_scheduler():
++    try:
++        from open_webui.tasks.reconcile import stop_background_reconcile
++
++        await stop_background_reconcile(app)
++    except Exception:
++        log.exception("Failed to stop reconcile scheduler gracefully")
++
++# Middleware to log missing static file requests for easier debugging
++from starlette.middleware.base import BaseHTTPMiddleware
++
++class Static404LoggerMiddleware(BaseHTTPMiddleware):
++    async def dispatch(self, request, call_next):
++        # Log the incoming request for manifest.json for debugging
++        try:
++            if request.url.path == "/manifest.json":
++                # Log request method and relevant headers
++                headers = {k: v for k, v in request.headers.items() if k in ["content-type", "content-length", "content-encoding", "user-agent", "origin"]}
++                log.info(f"Manifest request from {request.client}: method={request.method}, headers={headers}")
++        except Exception as e:
++            log.debug(f"Error logging manifest request: {e}")
++
++        response = await call_next(request)
++
++        try:
++            # Existing static 404 logging
++            if request.url.path.startswith("/static") and response.status_code == 404:
++                file_path = os.path.abspath(os.path.join(STATIC_DIR, request.url.path[len("/static/"):]))
++                exists = os.path.exists(file_path)
++                log.warning(f"Static file not found: {request.url.path} (exists on disk={exists})")
++
++            # Log manifest response details (status and content-type) only — avoid reading body to prevent streaming issues
++            if request.url.path == "/manifest.json":
++                try:
++                    content_type = response.headers.get("content-type") if hasattr(response, "headers") else None
++                except Exception:
++                    content_type = None
++                log.info(f"Manifest response: status={response.status_code}, content-type={content_type}")
++        except Exception:
++            pass
++
++        return response
++
++app.add_middleware(Static404LoggerMiddleware)
++
++
++# Simple in-memory rate limiter for debug reports (per-IP)
++CLIENT_404_RATE = {}
++CLIENT_404_WINDOW_MS = 5 * 60 * 1000
++CLIENT_404_MAX = 20
++
++@app.post("/_debug/client-404")
++async def client_404_debug(request: Request, background_tasks: BackgroundTasks):
++    """Accept client-side debug reports and log them in a background task to keep the handler fast and avoid blocking the ASGI worker."""
++
++    # Rate-limit by client IP
++    try:
++        addr = request.client.host if request.client else 'unknown'
++        now = int(time.time() * 1000)
++        rec = CLIENT_404_RATE.get(addr) or []
++        # prune
++        rec = [t for t in rec if now - t < CLIENT_404_WINDOW_MS]
++        if len(rec) >= CLIENT_404_MAX:
++            # drop silently
++            CLIENT_404_RATE[addr] = rec
++            return Response(status_code=204)
++        rec.append(now)
++        CLIENT_404_RATE[addr] = rec
++    except Exception:
++        pass
++
++    async def _log_body(body_bytes: bytes):
++        try:
++            txt = body_bytes.decode("utf-8")
++            payload = json.loads(txt)
++        except Exception as e:
++            payload = {"error": f"failed to parse json: {e}", "raw": (body_bytes.decode('utf-8', errors='replace')[:1000])}
++        try:
++            log.info(f"Client-side 404 report from {request.client}: {payload}")
++        except Exception:
++            log.exception("Failed logging client-404 payload")
++
++    try:
++        body = await request.body()
++    except Exception:
++        # If we cannot read the body, return 204 quickly
++        return Response(status_code=204)
++
++    # Limit size to avoid OOM from malicious/huge payloads
++    MAX_BODY = 128 * 1024
++    if len(body) > MAX_BODY:
++        body = body[:MAX_BODY]
++
++    background_tasks.add_task(_log_body, body)
++    return Response(status_code=204)
++
++
++@app.post("/_debug/client-login")
++async def client_login_debug(request: Request, background_tasks: BackgroundTasks):
++    """Accept one-time client login telemetry (service workers, caches, token presence)"""
++
++    async def _log_body(body_bytes: bytes):
++        try:
++            txt = body_bytes.decode("utf-8")
++            payload = json.loads(txt)
++        except Exception as e:
++            payload = {"error": f"failed to parse json: {e}", "raw": (body_bytes.decode('utf-8', errors='replace')[:1000])}
++        try:
++            log.info(f"Client login telemetry from {request.client}: {payload}")
++        except Exception:
++            log.exception("Failed logging client-login payload")
++
++    try:
++        body = await request.body()
++    except Exception:
++        return Response(status_code=204)
++
++    MAX_BODY = 16 * 1024
++    if len(body) > MAX_BODY:
++        body = body[:MAX_BODY]
++
++    background_tasks.add_task(_log_body, body)
++    return Response(status_code=204)
++
+ app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+ 
+ 

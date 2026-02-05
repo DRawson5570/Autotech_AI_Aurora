@@ -1,0 +1,17 @@
+[Unit]
+Description=Open WebUI (local repo)
+After=network.target
+
+[Service]
+# Set USER to the account that owns /prod/autotech_ai on the server
+User=YOUR_USER_HERE
+WorkingDirectory=/prod/autotech_ai
+EnvironmentFile=/etc/default/open-webui-local
+# ExecStart uses conda run to activate the conda env and start uvicorn
+ExecStart=/bin/bash -lc 'conda run -n open-webui --no-capture-output python -m uvicorn open_webui.main:app --host 0.0.0.0 --port 8080'
+Restart=always
+RestartSec=5
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

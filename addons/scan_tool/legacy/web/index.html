@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autotech AI - Scan Tool</title>
+    <style>
+        :root {
+            --bg-dark: #1a1a2e;
+            --bg-card: #16213e;
+            --accent: #e94560;
+            --accent-hover: #ff6b6b;
+            --text: #eee;
+            --text-muted: #888;
+            --success: #4ade80;
+            --warning: #fbbf24;
+            --error: #ef4444;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: var(--text-muted);
+        }
+        
+        .card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .card h2 {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--text-muted);
+        }
+        
+        .status-indicator.connected {
+            background: var(--success);
+            box-shadow: 0 0 10px var(--success);
+        }
+        
+        .status-indicator.error {
+            background: var(--error);
+        }
+        
+        button {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        button:hover {
+            background: var(--accent-hover);
+        }
+        
+        button:disabled {
+            background: var(--text-muted);
+            cursor: not-allowed;
+        }
+        
+        .button-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .button-secondary {
+            background: transparent;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+        }
+        
+        .button-secondary:hover {
+            background: var(--accent);
+            color: white;
+        }
+        
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .data-item {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 8px;
+        }
+        
+        .data-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+        }
+        
+        .data-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .data-value.warning {
+            color: var(--warning);
+        }
+        
+        .data-value.error {
+            color: var(--error);
+        }
+        
+        .data-value.success {
+            color: var(--success);
+        }
+        
+        .dtc-list {
+            list-style: none;
+        }
+        
+        .dtc-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .dtc-code {
+            font-family: monospace;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--error);
+        }
+        
+        .dtc-status {
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: var(--error);
+        }
+        
+        .dtc-status.pending {
+            background: var(--warning);
+            color: black;
+        }
+        
+        .log {
+            background: #0a0a0a;
+            border-radius: 8px;
+            padding: 15px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .log-entry {
+            margin-bottom: 5px;
+            color: var(--text-muted);
+        }
+        
+        .log-entry.error {
+            color: var(--error);
+        }
+        
+        .log-entry.success {
+            color: var(--success);
+        }
+        
+        .diagnosis-card {
+            border: 2px solid var(--accent);
+        }
+        
+        .diagnosis-summary {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+        }
+        
+        .diagnosis-section {
+            margin-top: 20px;
+        }
+        
+        .diagnosis-section h3 {
+            font-size: 1rem;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+        
+        .cause-item, .test-item {
+            padding: 10px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .cause-probability {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            margin-left: 10px;
+        }
+        
+        .cause-probability.high {
+            background: var(--error);
+        }
+        
+        .cause-probability.medium {
+            background: var(--warning);
+            color: black;
+        }
+        
+        .cause-probability.low {
+            background: var(--text-muted);
+        }
+        
+        .safety-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 10px;
+            background: rgba(239, 68, 68, 0.2);
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        #manualEntry {
+            margin-top: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--text-muted);
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            background: rgba(255,255,255,0.05);
+            color: var(--text);
+            font-size: 1rem;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+        
+        @media (max-width: 600px) {
+            .data-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .button-row {
+                flex-direction: column;
+            }
+            
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔧 Autotech AI Scan Tool</h1>
+            <p class="subtitle">Connect your OBD2 adapter and let AI diagnose</p>
+        </header>
+        
+        <!-- Connection Card -->
+        <div class="card" id="connectionCard">
+            <h2>
+                <span class="status-indicator" id="statusIndicator"></span>
+                Connection Status: <span id="connectionStatus">Disconnected</span>
+            </h2>
+            
+            <div class="button-row">
+                <button id="connectBtn" onclick="connectAdapter()">Connect OBD2 Adapter</button>
+                <button id="disconnectBtn" class="button-secondary hidden" onclick="disconnectAdapter()">Disconnect</button>
+            </div>
+            
+            <div class="log hidden" id="logPanel">
+                <div id="logContent"></div>
+            </div>
+        </div>
+        
+        <!-- Vehicle Info Card -->
+        <div class="card hidden" id="vehicleCard">
+            <h2>🚗 Vehicle Information</h2>
+            <div class="data-grid">
+                <div class="data-item">
+                    <div class="data-label">VIN</div>
+                    <div class="data-value" id="vinValue">--</div>
+                </div>
+                <div class="data-item">
+                    <div class="data-label">Protocol</div>
+                    <div class="data-value" id="protocolValue">--</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- DTCs Card -->
+        <div class="card hidden" id="dtcCard">
+            <h2>⚠️ Diagnostic Trouble Codes</h2>
+            <ul class="dtc-list" id="dtcList">
+                <li class="dtc-item">
+                    <span class="dtc-code">No DTCs</span>
+                </li>
+            </ul>
+            <div class="button-row" style="margin-top: 15px;">
+                <button onclick="readDTCs()">Read DTCs</button>
+                <button class="button-secondary" onclick="clearDTCs()">Clear DTCs</button>
+            </div>
+        </div>
+        
+        <!-- Live Data Card -->
+        <div class="card hidden" id="liveDataCard">
+            <h2>📊 Live Data</h2>
+            <div class="data-grid" id="liveDataGrid">
+                <!-- Populated by JS -->
+            </div>
+            <div class="button-row" style="margin-top: 15px;">
+                <button id="startLiveBtn" onclick="startLiveData()">Start Live Data</button>
+                <button id="stopLiveBtn" class="button-secondary hidden" onclick="stopLiveData()">Stop</button>
+            </div>
+        </div>
+        
+        <!-- Diagnose Button -->
+        <div class="card hidden" id="diagnoseCard">
+            <h2>🤖 AI Diagnosis</h2>
+            <p style="margin-bottom: 15px; color: var(--text-muted);">
+                Send all collected data to AI for intelligent diagnosis
+            </p>
+            <button onclick="getDiagnosis()" style="width: 100%; font-size: 1.2rem; padding: 15px;">
+                🔍 Diagnose Now
+            </button>
+        </div>
+        
+        <!-- Diagnosis Results -->
+        <div class="card diagnosis-card hidden" id="diagnosisResults">
+            <h2>📋 Diagnosis Results</h2>
+            <div class="diagnosis-summary" id="diagnosisSummary"></div>
+            
+            <div class="diagnosis-section">
+                <h3>Likely Causes</h3>
+                <div id="likelyCauses"></div>
+            </div>
+            
+            <div class="diagnosis-section">
+                <h3>Recommended Tests</h3>
+                <div id="recommendedTests"></div>
+            </div>
+            
+            <div class="diagnosis-section hidden" id="safetySection">
+                <h3>⚠️ Safety Notes</h3>
+                <div id="safetyNotes"></div>
+            </div>
+        </div>
+        
+        <!-- Manual Entry Fallback -->
+        <div class="card" id="manualEntry">
+            <h2>📝 Manual Data Entry</h2>
+            <p style="margin-bottom: 15px; color: var(--text-muted);">
+                No OBD2 adapter? Enter your scan data manually.
+            </p>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Year</label>
+                    <input type="number" id="manualYear" placeholder="2018">
+                </div>
+                <div class="form-group">
+                    <label>Make</label>
+                    <input type="text" id="manualMake" placeholder="Ford">
+                </div>
+                <div class="form-group">
+                    <label>Model</label>
+                    <input type="text" id="manualModel" placeholder="F-150">
+                </div>
+                <div class="form-group">
+                    <label>Engine</label>
+                    <input type="text" id="manualEngine" placeholder="5.0L">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>DTCs (comma separated)</label>
+                <input type="text" id="manualDTCs" placeholder="P0300, P0171">
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>STFT Bank 1 (%)</label>
+                    <input type="number" step="0.1" id="manualSTFT1" placeholder="0">
+                </div>
+                <div class="form-group">
+                    <label>LTFT Bank 1 (%)</label>
+                    <input type="number" step="0.1" id="manualLTFT1" placeholder="0">
+                </div>
+                <div class="form-group">
+                    <label>STFT Bank 2 (%)</label>
+                    <input type="number" step="0.1" id="manualSTFT2" placeholder="0">
+                </div>
+                <div class="form-group">
+                    <label>LTFT Bank 2 (%)</label>
+                    <input type="number" step="0.1" id="manualLTFT2" placeholder="0">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Additional Symptoms</label>
+                <input type="text" id="manualSymptoms" placeholder="Rough idle, hesitation on acceleration">
+            </div>
+            
+            <button onclick="submitManualData()" style="width: 100%;">🔍 Get AI Diagnosis</button>
+        </div>
+    </div>
+    
+    <script>
+        // State
+        let port = null;
+        let reader = null;
+        let writer = null;
+        let connected = false;
+        let liveDataInterval = null;
+        let collectedData = {
+            vehicle: {},
+            dtcs: [],
+            livePids: {},
+            freezeFrame: {}
+        };
+        
+        // Logging
+        function log(message, type = 'info') {
+            const logContent = document.getElementById('logContent');
+            const logPanel = document.getElementById('logPanel');
+            logPanel.classList.remove('hidden');
+            
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logContent.appendChild(entry);
+            logContent.scrollTop = logContent.scrollHeight;
+            
+            console.log(`[${type}] ${message}`);
+        }
+        
+        // Connection
+        async function connectAdapter() {
+            if (!('serial' in navigator)) {
+                alert('Web Serial API not supported. Use Chrome or Edge on desktop.');
+                return;
+            }
+            
+            try {
+                log('Requesting serial port...');
+                port = await navigator.serial.requestPort();
+                
+                log('Opening port at 38400 baud...');
+                await port.open({ baudRate: 38400 });
+                
+                reader = port.readable.getReader();
+                writer = port.writable.getWriter();
+                
+                connected = true;
+                updateConnectionUI(true);
+                log('Port opened successfully', 'success');
+                
+                // Initialize ELM327
+                await initializeELM327();
+                
+            } catch (error) {
+                log(`Connection failed: ${error.message}`, 'error');
+                connected = false;
+                updateConnectionUI(false);
+            }
+        }
+        
+        async function disconnectAdapter() {
+            if (liveDataInterval) {
+                stopLiveData();
+            }
+            
+            try {
+                if (reader) {
+                    await reader.cancel();
+                    reader.releaseLock();
+                }
+                if (writer) {
+                    writer.releaseLock();
+                }
+                if (port) {
+                    await port.close();
+                }
+            } catch (error) {
+                console.error('Disconnect error:', error);
+            }
+            
+            port = null;
+            reader = null;
+            writer = null;
+            connected = false;
+            updateConnectionUI(false);
+            log('Disconnected');
+        }
+        
+        function updateConnectionUI(isConnected) {
+            const indicator = document.getElementById('statusIndicator');
+            const status = document.getElementById('connectionStatus');
+            const connectBtn = document.getElementById('connectBtn');
+            const disconnectBtn = document.getElementById('disconnectBtn');
+            
+            if (isConnected) {
+                indicator.classList.add('connected');
+                status.textContent = 'Connected';
+                connectBtn.classList.add('hidden');
+                disconnectBtn.classList.remove('hidden');
+                
+                // Show other cards
+                document.getElementById('vehicleCard').classList.remove('hidden');
+                document.getElementById('dtcCard').classList.remove('hidden');
+                document.getElementById('liveDataCard').classList.remove('hidden');
+                document.getElementById('diagnoseCard').classList.remove('hidden');
+                document.getElementById('manualEntry').classList.add('hidden');
+            } else {
+                indicator.classList.remove('connected');
+                status.textContent = 'Disconnected';
+                connectBtn.classList.remove('hidden');
+                disconnectBtn.classList.add('hidden');
+                
+                // Hide other cards
+                document.getElementById('vehicleCard').classList.add('hidden');
+                document.getElementById('dtcCard').classList.add('hidden');
+                document.getElementById('liveDataCard').classList.add('hidden');
+                document.getElementById('diagnoseCard').classList.add('hidden');
+                document.getElementById('manualEntry').classList.remove('hidden');
+            }
+        }
+        
+        // ELM327 Communication
+        async function sendCommand(cmd, timeout = 3000) {
+            if (!writer || !reader) return null;
+            
+            const encoder = new TextEncoder();
+            const decoder = new TextDecoder();
+            
+            // Send command
+            await writer.write(encoder.encode(cmd + '\r'));
+            
+            // Read response
+            let response = '';
+            const startTime = Date.now();
+            
+            while (Date.now() - startTime < timeout) {
+                try {
+                    const { value, done } = await Promise.race([
+                        reader.read(),
+                        new Promise((_, reject) => 
+                            setTimeout(() => reject(new Error('timeout')), 1000)
+                        )
+                    ]);
+                    
+                    if (done) break;
+                    response += decoder.decode(value);
+                    
+                    if (response.includes('>')) break;
+                } catch (e) {
+                    if (e.message === 'timeout') continue;
+                    throw e;
+                }
+            }
+            
+            return response.replace(/[\r\n>]/g, ' ').trim();
+        }
+        
+        async function initializeELM327() {
+            log('Initializing ELM327...');
+            
+            // Reset
+            let resp = await sendCommand('ATZ', 5000);
+            log(`Reset: ${resp}`);
+            await new Promise(r => setTimeout(r, 1000));
+            
+            // Echo off
+            await sendCommand('ATE0');
+            
+            // Headers off
+            await sendCommand('ATH0');
+            
+            // Auto protocol
+            await sendCommand('ATSP0');
+            
+            // Try to connect to vehicle
+            log('Connecting to vehicle ECU...');
+            resp = await sendCommand('0100', 10000);
+            
+            if (resp && !resp.includes('UNABLE') && !resp.includes('ERROR')) {
+                log('Connected to vehicle ECU', 'success');
+                
+                // Get protocol
+                const protocol = await sendCommand('ATDP');
+                document.getElementById('protocolValue').textContent = protocol || 'Auto';
+                
+                // Try to get VIN
+                const vin = await sendCommand('0902', 5000);
+                if (vin && vin.length > 10) {
+                    document.getElementById('vinValue').textContent = 'Reading...';
+                    // VIN parsing would go here
+                }
+                
+                // Initial DTC read
+                await readDTCs();
+                
+            } else {
+                log('Failed to connect to vehicle ECU', 'error');
+                document.getElementById('statusIndicator').classList.add('error');
+            }
+        }
+        
+        async function readDTCs() {
+            if (!connected) return;
+            
+            log('Reading DTCs...');
+            collectedData.dtcs = [];
+            
+            // Mode 03 - Current DTCs
+            const currentDTCs = await sendCommand('03');
+            parseDTCs(currentDTCs, 'current');
+            
+            // Mode 07 - Pending DTCs  
+            const pendingDTCs = await sendCommand('07');
+            parseDTCs(pendingDTCs, 'pending');
+            
+            updateDTCDisplay();
+        }
+        
+        function parseDTCs(response, status) {
+            if (!response || response.includes('NO DATA')) return;
+            
+            // Extract hex pairs
+            const hexPairs = response.match(/[0-9A-Fa-f]{2}/g);
+            if (!hexPairs || hexPairs.length < 2) return;
+            
+            // Skip mode response byte, process pairs
+            for (let i = 1; i < hexPairs.length - 1; i += 2) {
+                const byte1 = parseInt(hexPairs[i], 16);
+                const byte2 = parseInt(hexPairs[i + 1], 16);
+                
+                if (byte1 === 0 && byte2 === 0) continue;
+                
+                const categories = ['P', 'C', 'B', 'U'];
+                const category = categories[(byte1 >> 6) & 0x03];
+                const digit1 = (byte1 >> 4) & 0x03;
+                const digit2 = byte1 & 0x0F;
+                const digit3 = (byte2 >> 4) & 0x0F;
+                const digit4 = byte2 & 0x0F;
+                
+                const code = `${category}${digit1}${digit2.toString(16).toUpperCase()}${digit3.toString(16).toUpperCase()}${digit4.toString(16).toUpperCase()}`;
+                
+                collectedData.dtcs.push({ code, status });
+                log(`Found DTC: ${code} (${status})`);
+            }
+        }
+        
+        function updateDTCDisplay() {
+            const list = document.getElementById('dtcList');
+            
+            if (collectedData.dtcs.length === 0) {
+                list.innerHTML = '<li class="dtc-item"><span class="dtc-code" style="color: var(--success)">No DTCs Found ✓</span></li>';
+                return;
+            }
+            
+            list.innerHTML = collectedData.dtcs.map(dtc => `
+                <li class="dtc-item">
+                    <span class="dtc-code">${dtc.code}</span>
+                    <span class="dtc-status ${dtc.status}">${dtc.status}</span>
+                </li>
+            `).join('');
+        }
+        
+        async function clearDTCs() {
+            if (!connected) return;
+            if (!confirm('Are you sure you want to clear all DTCs?')) return;
+            
+            log('Clearing DTCs...');
+            const resp = await sendCommand('04');
+            
+            if (resp && !resp.includes('ERROR')) {
+                log('DTCs cleared', 'success');
+                collectedData.dtcs = [];
+                updateDTCDisplay();
+            } else {
+                log('Failed to clear DTCs', 'error');
+            }
+        }
+        
+        // Live Data
+        const pidConfig = [
+            { pid: '04', name: 'load', label: 'Engine Load', unit: '%', decoder: (d) => d[0] / 2.55 },
+            { pid: '05', name: 'coolant_temp', label: 'Coolant', unit: '°C', decoder: (d) => d[0] - 40 },
+            { pid: '06', name: 'stft1', label: 'STFT B1', unit: '%', decoder: (d) => (d[0] - 128) * 100/128, isTrim: true },
+            { pid: '07', name: 'ltft1', label: 'LTFT B1', unit: '%', decoder: (d) => (d[0] - 128) * 100/128, isTrim: true },
+            { pid: '08', name: 'stft2', label: 'STFT B2', unit: '%', decoder: (d) => (d[0] - 128) * 100/128, isTrim: true },
+            { pid: '09', name: 'ltft2', label: 'LTFT B2', unit: '%', decoder: (d) => (d[0] - 128) * 100/128, isTrim: true },
+            { pid: '0C', name: 'rpm', label: 'RPM', unit: '', decoder: (d) => ((d[0] * 256) + d[1]) / 4 },
+            { pid: '0D', name: 'vehicle_speed', label: 'Speed', unit: 'km/h', decoder: (d) => d[0] },
+            { pid: '11', name: 'throttle', label: 'Throttle', unit: '%', decoder: (d) => d[0] / 2.55 },
+            { pid: '42', name: 'control_voltage', label: 'Voltage', unit: 'V', decoder: (d) => ((d[0] * 256) + d[1]) / 1000 },
+        ];
+        
+        function initLiveDataGrid() {
+            const grid = document.getElementById('liveDataGrid');
+            grid.innerHTML = pidConfig.map(p => `
+                <div class="data-item">
+                    <div class="data-label">${p.label}</div>
+                    <div class="data-value" id="live-${p.name}">--</div>
+                </div>
+            `).join('');
+        }
+        
+        async function startLiveData() {
+            if (!connected || liveDataInterval) return;
+            
+            initLiveDataGrid();
+            document.getElementById('startLiveBtn').classList.add('hidden');
+            document.getElementById('stopLiveBtn').classList.remove('hidden');
+            
+            log('Starting live data stream...');
+            
+            async function readOnce() {
+                for (const p of pidConfig) {
+                    if (!connected) return;
+                    
+                    const resp = await sendCommand(`01${p.pid}`, 1000);
+                    if (resp && !resp.includes('NO DATA')) {
+                        const hexPairs = resp.match(/[0-9A-Fa-f]{2}/g);
+                        if (hexPairs && hexPairs.length >= 3) {
+                            // Skip 41 XX (mode + pid), get data bytes
+                            const dataBytes = hexPairs.slice(2).map(h => parseInt(h, 16));
+                            const value = p.decoder(dataBytes);
+                            
+                            collectedData.livePids[p.name] = value;
+                            
+                            const el = document.getElementById(`live-${p.name}`);
+                            if (el) {
+                                let displayValue = p.isTrim ? `${value >= 0 ? '+' : ''}${value.toFixed(1)}` : value.toFixed(p.unit === 'V' ? 2 : 0);
+                                el.textContent = `${displayValue}${p.unit}`;
+                                
+                                // Color fuel trims
+                                if (p.isTrim) {
+                                    el.className = 'data-value';
+                                    if (Math.abs(value) > 20) el.classList.add('error');
+                                    else if (Math.abs(value) > 10) el.classList.add('warning');
+                                    else el.classList.add('success');
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            await readOnce();
+            liveDataInterval = setInterval(readOnce, 2000);
+        }
+        
+        function stopLiveData() {
+            if (liveDataInterval) {
+                clearInterval(liveDataInterval);
+                liveDataInterval = null;
+            }
+            document.getElementById('startLiveBtn').classList.remove('hidden');
+            document.getElementById('stopLiveBtn').classList.add('hidden');
+            log('Live data stopped');
+        }
+        
+        // Diagnosis
+        async function getDiagnosis() {
+            log('Requesting AI diagnosis...');
+            
+            const requestData = {
+                vehicle: collectedData.vehicle,
+                dtcs: collectedData.dtcs,
+                live_pids: collectedData.livePids,
+                freeze_frame: collectedData.freezeFrame
+            };
+            
+            try {
+                const response = await fetch('/api/scan/diagnose', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        // Add auth header if needed
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
+                const diagnosis = await response.json();
+                displayDiagnosis(diagnosis);
+                log('Diagnosis received', 'success');
+                
+            } catch (error) {
+                log(`Diagnosis failed: ${error.message}`, 'error');
+                alert('Failed to get diagnosis. Check connection and try again.');
+            }
+        }
+        
+        function displayDiagnosis(diagnosis) {
+            const results = document.getElementById('diagnosisResults');
+            results.classList.remove('hidden');
+            
+            document.getElementById('diagnosisSummary').textContent = diagnosis.summary;
+            
+            // Likely causes
+            const causesDiv = document.getElementById('likelyCauses');
+            causesDiv.innerHTML = diagnosis.likely_causes.map(c => `
+                <div class="cause-item">
+                    <strong>${c.cause}</strong>
+                    <span class="cause-probability ${c.probability}">${c.probability}</span>
+                    ${c.explanation ? `<p style="margin-top: 5px; color: var(--text-muted); font-size: 0.9rem;">${c.explanation}</p>` : ''}
+                </div>
+            `).join('') || '<p>No specific causes identified</p>';
+            
+            // Recommended tests
+            const testsDiv = document.getElementById('recommendedTests');
+            testsDiv.innerHTML = diagnosis.recommended_tests.map(t => `
+                <div class="test-item">
+                    <strong>${t.test}</strong>
+                    ${t.reason ? `<p style="color: var(--text-muted); font-size: 0.9rem;">${t.reason}</p>` : ''}
+                    ${t.expected_result ? `<p style="color: var(--success); font-size: 0.9rem;">Expected: ${t.expected_result}</p>` : ''}
+                </div>
+            `).join('') || '<p>No specific tests recommended</p>';
+            
+            // Safety notes
+            if (diagnosis.safety_notes && diagnosis.safety_notes.length > 0) {
+                const safetySection = document.getElementById('safetySection');
+                const safetyDiv = document.getElementById('safetyNotes');
+                safetySection.classList.remove('hidden');
+                safetyDiv.innerHTML = diagnosis.safety_notes.map(n => `
+                    <div class="safety-note">⚠️ ${n}</div>
+                `).join('');
+            }
+            
+            // Scroll to results
+            results.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // Manual Entry
+        async function submitManualData() {
+            const dtcInput = document.getElementById('manualDTCs').value;
+            const dtcs = dtcInput.split(',').map(d => d.trim().toUpperCase()).filter(d => d);
+            
+            const requestData = {
+                vehicle: {
+                    year: parseInt(document.getElementById('manualYear').value) || null,
+                    make: document.getElementById('manualMake').value || null,
+                    model: document.getElementById('manualModel').value || null,
+                    engine: document.getElementById('manualEngine').value || null
+                },
+                dtcs: dtcs.map(code => ({ code, status: 'current' })),
+                live_pids: {
+                    stft1: parseFloat(document.getElementById('manualSTFT1').value) || null,
+                    ltft1: parseFloat(document.getElementById('manualLTFT1').value) || null,
+                    stft2: parseFloat(document.getElementById('manualSTFT2').value) || null,
+                    ltft2: parseFloat(document.getElementById('manualLTFT2').value) || null
+                },
+                symptoms: document.getElementById('manualSymptoms').value || null
+            };
+            
+            try {
+                const response = await fetch('/api/scan/diagnose', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
+                const diagnosis = await response.json();
+                displayDiagnosis(diagnosis);
+                
+            } catch (error) {
+                alert('Failed to get diagnosis: ' + error.message);
+            }
+        }
+        
+        // Init
+        initLiveDataGrid();
+    </script>
+</body>
+</html>

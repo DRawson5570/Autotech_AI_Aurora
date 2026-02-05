@@ -1,0 +1,150 @@
+{
+  "trace": [
+    [
+      {
+        "scenario_id": "EDM_005",
+        "predictions": [
+          {
+            "hypothesis": "Cooling pump failure",
+            "prob": 0.8,
+            "reason": [
+              "high coolant temp",
+              "inverter THERMAL_DERATE",
+              "high Ia_max",
+              "pump current likely low"
+            ],
+            "tests": [
+              "measure pump_motor_current_last_60s_mean",
+              "measure coolant_inlet_temp",
+              "measure coolant_outlet_temp"
+            ],
+            "mitigation": "limit torque and request service for pump"
+          }
+        ],
+        "requested_measurements": [
+          "pump_motor_current_last_60s_mean",
+          "pump_motor_current_history",
+          "coolant_inlet_temp",
+          "coolant_outlet_temp"
+        ],
+        "explanation": "High coolant temperature and inverter thermal derate suggest overheating due to a failed pump; measuring pump current and inlet/outlet temps will confirm the pump\u2019s operation."
+      },
+      {
+        "pump_motor_current_last_60s_mean": "NOT_AVAILABLE",
+        "pump_motor_current_history": [
+          2.0882795673068983,
+          2.043019688718189,
+          1.922661802640155,
+          2.1179164620263826,
+          2.015568792656161,
+          2.02283829411387,
+          1.9680615401965689,
+          0.1027915404548687,
+          0.0963714098725847,
+          0.0939539414871957,
+          0.1013301476726898,
+          0.1096180368567207,
+          0.1052229151746804,
+          0.0985922889246362,
+          0.1011245023069572,
+          0.0981826261828365,
+          0.0962966827081902,
+          0.1061577819704999,
+          0.10619536859215,
+          0.1011369198061672
+        ],
+        "coolant_inlet_temp": "NOT_AVAILABLE",
+        "coolant_outlet_temp": "NOT_AVAILABLE"
+      }
+    ],
+    [
+      {
+        "scenario_id": "EDM_005",
+        "predictions": [
+          {
+            "hypothesis": "Cooling pump failure",
+            "prob": 0.95,
+            "reason": [
+              "pump current ~0.1A",
+              "high coolant temp",
+              "inverter THERMAL_DERATE"
+            ],
+            "tests": [
+              "measure coolant_inlet_temp",
+              "measure coolant_outlet_temp"
+            ],
+            "mitigation": "limit torque and request pump replacement"
+          }
+        ],
+        "requested_measurements": [
+          "pump_motor_current_last_60s_mean",
+          "coolant_inlet_temp",
+          "coolant_outlet_temp"
+        ],
+        "explanation": "Low pump current confirms pump is not running; combined with high coolant temperature and inverter thermal derate indicates pump failure."
+      },
+      {
+        "pump_motor_current_last_60s_mean": "NOT_AVAILABLE",
+        "coolant_inlet_temp": "NOT_AVAILABLE",
+        "coolant_outlet_temp": "NOT_AVAILABLE"
+      }
+    ],
+    [
+      {
+        "scenario_id": "EDM_005",
+        "predictions": [
+          {
+            "hypothesis": "Cooling pump failure",
+            "prob": 0.8,
+            "reason": [
+              "high coolant temp (8029.8\u00b0C)",
+              "inverter THERMAL_DERATE",
+              "missing pump current indicates likely low"
+            ],
+            "tests": [
+              "measure pump_motor_current_history",
+              "measure coolant_inlet_temp_history",
+              "measure coolant_outlet_temp_history",
+              "measure Vdc_min_last_60s_mean"
+            ],
+            "mitigation": "limit torque and schedule pump replacement"
+          }
+        ],
+        "requested_measurements": [
+          "pump_motor_current_history",
+          "coolant_inlet_temp_history",
+          "coolant_outlet_temp_history",
+          "Vdc_min_last_60s_mean"
+        ],
+        "explanation": "High coolant temp and inverter thermal derate point to cooling failure; missing pump current confirms the need for current trend data to validate the hypothesis."
+      },
+      {
+        "pump_motor_current_history": [
+          2.0882795673068983,
+          2.043019688718189,
+          1.922661802640155,
+          2.1179164620263826,
+          2.015568792656161,
+          2.02283829411387,
+          1.9680615401965689,
+          0.1027915404548687,
+          0.0963714098725847,
+          0.0939539414871957,
+          0.1013301476726898,
+          0.1096180368567207,
+          0.1052229151746804,
+          0.0985922889246362,
+          0.1011245023069572,
+          0.0981826261828365,
+          0.0962966827081902,
+          0.1061577819704999,
+          0.10619536859215,
+          0.1011369198061672
+        ],
+        "coolant_inlet_temp_history": "NOT_AVAILABLE",
+        "coolant_outlet_temp_history": "NOT_AVAILABLE",
+        "Vdc_min_last_60s_mean": "NOT_AVAILABLE"
+      }
+    ]
+  ]
+}

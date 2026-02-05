@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DTC Code Diagnosis Example - Autotech AI</title>
+    <meta name="description" content="Learn how to use Autotech AI to diagnose check engine lights and DTC codes." />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: { sans: ['Inter', 'sans-serif'] },
+            colors: {
+              slate: { 800: '#1e293b', 850: '#171717', 900: '#0a0a0a', 950: '#050505' },
+              brand: { blue: '#06b6d4', orange: '#14b8a6', accent: '#22d3ee', dark: '#083344' }
+            },
+          },
+        },
+      }
+    </script>
+    <style>
+      ::-webkit-scrollbar { width: 10px; }
+      ::-webkit-scrollbar-track { background: #0a0a0a; }
+      ::-webkit-scrollbar-thumb { background: #334155; border-radius: 5px; }
+    </style>
+  </head>
+  <body class="bg-slate-950 text-slate-200 font-sans antialiased">
+    
+    <!-- Header -->
+    <header class="fixed w-full top-0 z-50 bg-slate-950/90 backdrop-blur-md border-b border-slate-800/50">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+          <a href="/" class="flex items-center space-x-2">
+            <div class="bg-gradient-to-br from-cyan-500 to-cyan-400 p-2 rounded-lg">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              </svg>
+            </div>
+            <span class="text-xl font-bold text-white tracking-tight">Autotech <span class="text-cyan-400">AI</span></span>
+          </a>
+          <nav class="hidden md:flex space-x-8">
+            <a href="/" class="text-slate-300 hover:text-white transition-colors">Home</a>
+            <a href="/examples/" class="text-brand-blue font-medium">Examples</a>
+          </nav>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="pt-24 pb-16">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Breadcrumb -->
+        <nav class="mb-8 text-sm">
+          <a href="/examples/" class="text-slate-400 hover:text-white">Examples</a>
+          <span class="text-slate-600 mx-2">/</span>
+          <span class="text-brand-blue">DTC Code Diagnosis</span>
+        </nav>
+
+        <!-- Page Header -->
+        <div class="mb-12">
+          <span class="inline-block px-3 py-1 text-xs font-medium text-red-400 bg-red-500/20 rounded-full mb-4">Beginner</span>
+          <h1 class="text-4xl font-extrabold text-white mb-4">DTC Code Diagnosis</h1>
+          <p class="text-xl text-slate-400">Customer comes in with a check engine light. Here's how to get expert guidance fast.</p>
+        </div>
+
+        <!-- Scenario Box -->
+        <div class="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 mb-8">
+          <h2 class="text-lg font-bold text-white mb-3 flex items-center">
+            <span class="text-2xl mr-3">📋</span> The Scenario
+          </h2>
+          <p class="text-slate-300">
+            A 2019 Toyota Camry comes in with the check engine light on. You pull codes and get <strong class="text-red-400">P0420</strong> - Catalyst System Efficiency Below Threshold. The customer says the car "seems to run fine."
+          </p>
+        </div>
+
+        <!-- Step 1 -->
+        <div class="mb-10">
+          <h2 class="text-2xl font-bold text-white mb-4 flex items-center">
+            <span class="w-8 h-8 bg-brand-blue rounded-full flex items-center justify-center text-sm font-bold text-white mr-3">1</span>
+            Start with Year/Make/Model + Code
+          </h2>
+          
+          <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+            <!-- Chat header -->
+            <div class="bg-slate-800 px-4 py-2 text-xs text-slate-400 border-b border-slate-700">
+              Your message
+            </div>
+            <div class="p-4">
+              <p class="text-white font-mono text-sm bg-slate-800 rounded-lg p-4">
+                2019 Toyota Camry 2.5L has code P0420. Car seems to run fine. What should I check?
+              </p>
+            </div>
+          </div>
+
+          <div class="mt-4 bg-blue-500/10 border border-blue-500/30 rounded-xl p-4">
+            <p class="text-blue-300 text-sm">
+              <strong>💡 Pro tip:</strong> Including the engine size (2.5L) helps - different engines have different common issues.
+            </p>
+          </div>
+        </div>
+
+        <!-- AI Response -->
+        <div class="mb-10">
+          <h2 class="text-2xl font-bold text-white mb-4 flex items-center">
+            <span class="w-8 h-8 bg-brand-blue rounded-full flex items-center justify-center text-sm font-bold text-white mr-3">2</span>
+            AI Response
+          </h2>
+          
+          <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+            <div class="bg-slate-800 px-4 py-2 text-xs text-slate-400 border-b border-slate-700 flex items-center">
+              <svg class="w-4 h-4 text-brand-blue mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+              </svg>
+              Autotech AI
+            </div>
+            <div class="p-5 space-y-4">
+              <p class="text-slate-300">
+                P0420 on the 2019 Camry 2.5L (A25A-FKS engine) is catalyst efficiency below threshold. Here's the diagnostic approach:
+              </p>
+              
+              <div>
+                <h4 class="font-bold text-white text-sm uppercase tracking-wider mb-2">Before Condemning the Cat:</h4>
+                <ol class="list-decimal list-inside text-slate-300 space-y-2 ml-2">
+                  <li><strong class="text-white">Check for exhaust leaks</strong> — A leak before the downstream O2 sensor causes false P0420</li>
+                  <li><strong class="text-white">Check O2 sensor waveforms</strong> — Upstream should switch rapidly, downstream should be relatively flat</li>
+                  <li><strong class="text-white">Check for recent work</strong> — Wrong O2 sensor, exhaust work, or tune can cause this</li>
+                </ol>
+              </div>
+
+              <div>
+                <h4 class="font-bold text-white text-sm uppercase tracking-wider mb-2">Common on This Model:</h4>
+                <p class="text-slate-300">
+                  The 2019 Camry has had some TSBs for P0420. <strong class="text-brand-accent">TSB 0116-19</strong> addresses ECU calibration that can cause false P0420 on low-mileage vehicles. Check if the ECU has the latest calibration.
+                </p>
+              </div>
+
+              <div>
+                <h4 class="font-bold text-white text-sm uppercase tracking-wider mb-2">Quick Test:</h4>
+                <p class="text-slate-300">
+                  Monitor both O2 sensors at steady cruise (2000-2500 RPM). If upstream is switching and downstream is flat but stays between 0.5-0.9V, the cat is likely fine — look elsewhere.
+                </p>
+              </div>
+
+              <div class="text-slate-400 text-sm border-t border-slate-800 pt-4 mt-4">
+                What's the mileage? And can you share the O2 sensor data if you have it?
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- What You Got -->
+        <div class="mb-10">
+          <h2 class="text-2xl font-bold text-white mb-4 flex items-center">
+            <span class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-sm font-bold text-white mr-3">✓</span>
+            What You Got
+          </h2>
+          
+          <div class="grid md:grid-cols-2 gap-4">
+            <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-4">
+              <h4 class="font-bold text-white mb-2">Diagnostic Steps</h4>
+              <p class="text-slate-400 text-sm">A logical order to check things before throwing parts at it.</p>
+            </div>
+            <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-4">
+              <h4 class="font-bold text-white mb-2">Model-Specific Info</h4>
+              <p class="text-slate-400 text-sm">TSB reference specific to this year/model — saves research time.</p>
+            </div>
+            <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-4">
+              <h4 class="font-bold text-white mb-2">Test Procedure</h4>
+              <p class="text-slate-400 text-sm">Specific parameters to look for when testing O2 sensors.</p>
+            </div>
+            <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-4">
+              <h4 class="font-bold text-white mb-2">Follow-up Questions</h4>
+              <p class="text-slate-400 text-sm">AI asks for more data to refine the diagnosis.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Try It Box -->
+        <div class="bg-gradient-to-r from-brand-blue/20 to-brand-accent/20 border border-brand-blue/30 rounded-2xl p-8 text-center">
+          <h2 class="text-2xl font-bold text-white mb-4">Try It Yourself</h2>
+          <p class="text-slate-300 mb-6">Got a code you're working on? Start a chat and see what Autotech AI can tell you.</p>
+          <a href="/auth" class="inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-full text-white bg-brand-blue hover:bg-cyan-600 transition-all">
+            Start Diagnosis
+          </a>
+        </div>
+
+        <!-- Navigation -->
+        <div class="mt-12 flex justify-between">
+          <a href="/examples/" class="text-slate-400 hover:text-white transition-colors flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+            All Examples
+          </a>
+          <a href="live-data-analysis.html" class="text-brand-blue hover:text-brand-accent transition-colors flex items-center">
+            Next: Live Data Analysis
+            <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </a>
+        </div>
+
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800 py-8">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-slate-500 text-sm">
+        <p>&copy; 2026 Autotech AI. All rights reserved.</p>
+      </div>
+    </footer>
+
+  </body>
+</html>

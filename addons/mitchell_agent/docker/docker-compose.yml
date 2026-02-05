@@ -1,0 +1,51 @@
+# Mitchell Agent Docker Compose
+# =============================
+# Easy deployment for the polling agent.
+#
+# Usage:
+#   1. Create config.json with your settings (see config.example.json)
+#   2. Run: docker-compose up -d
+#
+# Or use environment variables:
+#   MITCHELL_SHOP_ID=my-shop \
+#   MITCHELL_USERNAME=user \
+#   MITCHELL_PASSWORD=pass \
+#   docker-compose up -d
+
+services:
+  mitchell-agent:
+    build:
+      context: ../../../
+      dockerfile: addons/mitchell_agent/docker/Dockerfile
+    container_name: mitchell-agent
+    restart: unless-stopped
+    
+    # Mount config file
+    volumes:
+      - ./config.json:/config/config.json:ro
+    
+    # Or use environment variables (override config file)
+    environment:
+      - MITCHELL_SHOP_ID=${MITCHELL_SHOP_ID:-}
+      - MITCHELL_SHOP_NAME=${MITCHELL_SHOP_NAME:-}
+      - MITCHELL_SERVER_URL=${MITCHELL_SERVER_URL:-https://automotive.aurora-sentient.net}
+      - MITCHELL_USERNAME=${MITCHELL_USERNAME:-}
+      - MITCHELL_PASSWORD=${MITCHELL_PASSWORD:-}
+      - MITCHELL_HEADLESS=${MITCHELL_HEADLESS:-true}
+      - MITCHELL_POLL_INTERVAL=${MITCHELL_POLL_INTERVAL:-2}
+      - MITCHELL_LOG_LEVEL=${MITCHELL_LOG_LEVEL:-INFO}
+    
+    # Logging
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    
+    # Health check - verify agent is running
+    healthcheck:
+      test: ["CMD", "python", "-c", "import sys; sys.exit(0)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s

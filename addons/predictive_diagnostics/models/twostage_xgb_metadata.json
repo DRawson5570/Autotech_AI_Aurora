@@ -1,0 +1,158 @@
+{
+  "timestamp": "2026-02-02T03:01:15.876275",
+  "systems": [
+    "abs",
+    "airbag",
+    "body_electrical",
+    "brakes",
+    "charging",
+    "cooling",
+    "emissions",
+    "engine",
+    "ev",
+    "fuel",
+    "hvac",
+    "hybrid",
+    "ignition",
+    "lighting",
+    "starting",
+    "steering",
+    "suspension",
+    "tires",
+    "transmission"
+  ],
+  "failure_modes_per_system": {
+    "abs": [
+      "abs.module_communication",
+      "abs.pump_motor_weak",
+      "abs.tone_ring_damaged",
+      "abs.wheel_speed_sensor_failed"
+    ],
+    "airbag": [
+      "airbag.clock_spring_broken",
+      "airbag.seat_sensor_failed",
+      "airbag.srs_module_fault"
+    ],
+    "body_electrical": [
+      "body_electrical.bcm_fault",
+      "body_electrical.door_lock_actuator",
+      "body_electrical.parasitic_drain",
+      "body_electrical.relay_stuck",
+      "body_electrical.window_motor_failing"
+    ],
+    "brakes": [
+      "brakes.brake_fade",
+      "brakes.caliper_sticking",
+      "brakes.master_cylinder_failing",
+      "brakes.rotor_warped"
+    ],
+    "charging": [
+      "alternator.failing",
+      "battery.weak"
+    ],
+    "cooling": [
+      "cooling.coolant_leak",
+      "cooling.fan_always_on",
+      "cooling.fan_not_operating",
+      "cooling.radiator_blocked",
+      "cooling.thermostat_stuck_closed",
+      "cooling.thermostat_stuck_open",
+      "cooling.water_pump_failure",
+      "ect.sensor_failed_low",
+      "radiator.blocked_external",
+      "water.pump_belt_slipping"
+    ],
+    "emissions": [
+      "emissions.cat_clogged",
+      "emissions.cat_efficiency_low",
+      "emissions.egr_stuck_closed",
+      "emissions.egr_stuck_open",
+      "emissions.evap_leak_small",
+      "emissions.evap_purge_stuck_open",
+      "emissions.pcv_stuck_open",
+      "exhaust.pre_cat_leak"
+    ],
+    "engine": [
+      "engine.low_compression_cylinder",
+      "engine.valve_seat_recession",
+      "oil.pump_failure"
+    ],
+    "ev": [
+      "ev.charging_port_fault",
+      "ev.dc_dc_converter_fault",
+      "ev.onboard_charger_fault",
+      "tesla.hv_isolation_fault"
+    ],
+    "fuel": [
+      "fuel.air_filter_clogged",
+      "fuel.clogged_injector",
+      "fuel.injector_leaking",
+      "fuel.intake_gasket_leak",
+      "fuel.maf_contaminated",
+      "fuel.map_sensor_drift",
+      "fuel.o2_sensor_lazy",
+      "fuel.o2_sensor_stuck_lean",
+      "fuel.o2_sensor_stuck_rich",
+      "fuel.vacuum_leak",
+      "fuel.weak_fuel_pump"
+    ],
+    "hvac": [
+      "hvac.ac_compressor_failing",
+      "hvac.blend_door_stuck",
+      "hvac.blower_motor_failing",
+      "hvac.heater_core_clogged",
+      "hvac.refrigerant_low"
+    ],
+    "hybrid": [
+      "hybrid.12v_battery_weak",
+      "hybrid.cooling_pump_failed",
+      "hybrid.hv_battery_degraded",
+      "hybrid.inverter_fault"
+    ],
+    "ignition": [
+      "ignition.knock_sensor_failed",
+      "ignition.misfire_cylinder",
+      "ignition.weak_spark"
+    ],
+    "lighting": [
+      "lighting.ballast_failed",
+      "lighting.bcm_lighting_fault",
+      "lighting.headlight_out",
+      "lighting.turn_signal_fast"
+    ],
+    "starting": [
+      "starter.motor_failing",
+      "starting.neutral_safety_switch",
+      "starting.starter_solenoid_weak"
+    ],
+    "steering": [
+      "steering.alignment_out",
+      "steering.power_steering_pump_failing",
+      "steering.rack_leak",
+      "steering.tie_rod_worn"
+    ],
+    "suspension": [
+      "suspension.ball_joint_worn",
+      "suspension.shock_worn",
+      "suspension.spring_broken",
+      "suspension.strut_mount_failed",
+      "suspension.sway_bar_link_broken"
+    ],
+    "tires": [
+      "tires.low_pressure",
+      "tires.worn_tires"
+    ],
+    "transmission": [
+      "tcc.stuck_off",
+      "trans.fluid_low",
+      "transmission.slipping"
+    ]
+  },
+  "metrics": {
+    "system_accuracy": 0.9148237354937596,
+    "pipeline_accuracy": 0.8976352091088242,
+    "n_samples": 45667,
+    "n_systems": 19,
+    "n_failure_modes": 87
+  }
+}

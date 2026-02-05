@@ -1,0 +1,28 @@
+{
+  "scenario_id": "EDM_001",
+  "predictions": [
+    {
+      "hypothesis": "Cooling pump failure",
+      "prob": 0.8,
+      "reason": [
+        "high coolant temp (~80\u00b0C)",
+        "inverter THERMAL_DERATE",
+        "absence of pump load data"
+      ],
+      "tests": [
+        "measure pump_motor_current_last_60s_mean",
+        "measure pump_motor_current_history",
+        "measure coolant_inlet_temp_last_60s_mean",
+        "measure coolant_outlet_temp_last_60s_mean"
+      ],
+      "mitigation": "limit torque and schedule immediate pump inspection"
+    }
+  ],
+  "requested_measurements": [
+    "pump_motor_current_last_60s_mean",
+    "pump_motor_current_history",
+    "coolant_inlet_temp_last_60s_mean",
+    "coolant_outlet_temp_last_60s_mean"
+  ],
+  "explanation": "High coolant temp and thermal derate flag suggest cooling failure; pump current data is needed to confirm loss of load."
+}

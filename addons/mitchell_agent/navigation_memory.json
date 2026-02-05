@@ -1,0 +1,204 @@
+{
+  "learned_paths": {
+    "oil life reset procedure": {
+      "steps": [
+        {
+          "action": "click",
+          "selector": "#quickLinkRegion #resetProceduresAccess",
+          "element_text": "Reset Procedures",
+          "context": "landing page",
+          "result": "FOUND: Turn ignition to ON/RUN, with engine OFF. NOTE: On..."
+        }
+      ],
+      "selectors": [
+        "#quickLinkRegion #resetProceduresAccess"
+      ],
+      "human_readable": "Reset Procedures \u2192 FOUND: Turn ignition to ON/RUN, with engine OFF. NOTE: On",
+      "successes": 1,
+      "first_learned": "2026-01-10",
+      "last_success": "2026-01-10"
+    },
+    "fluid capacities": {
+      "steps": [
+        {
+          "action": "click",
+          "selector": "#quickLinkRegion #fluidsQuickAccess",
+          "element_text": "Fluid Capacities",
+          "context": "landing page",
+          "result": "FOUND: , \"parameters\": {\"data\": \"PrintBackFluid Capacitie..."
+        }
+      ],
+      "selectors": [
+        "#quickLinkRegion #fluidsQuickAccess"
+      ],
+      "human_readable": "Fluid Capacities \u2192 FOUND: , \"parameters\": {\"data\": \"PrintBackFluid Capacitie",
+      "successes": 2,
+      "first_learned": "2026-01-10",
+      "last_success": "2026-01-10"
+    },
+    "torque specs": {
+      "steps": [
+        {
+          "action": "click",
+          "selector": "#quickLinkRegion #commonSpecsAccess",
+          "element_text": "Common Specs",
+          "context": "landing page",
+          "result": "FOUND: 118 Ft. Lbs. (160 N.m) Rear 181 Ft. Lbs. (245 N.m)..."
+        }
+      ],
+      "selectors": [
+        "#quickLinkRegion #commonSpecsAccess"
+      ],
+      "human_readable": "Common Specs \u2192 FOUND: 118 Ft. Lbs. (160 N.m) Rear 181 Ft. Lbs. (245 N.m)",
+      "successes": 2,
+      "first_learned": "2026-01-10",
+      "last_success": "2026-01-10"
+    },
+    "tire pressure": {
+      "steps": [
+        {
+          "action": "click",
+          "selector": "#quickLinkRegion #tpmsTireFitmentQuickAccess",
+          "element_text": "Tire Information & Lifting Points",
+          "context": "landing page",
+          "result": "FOUND: Tire Pressure Monitoring System Programmable Senso..."
+        }
+      ],
+      "selectors": [
+        "#quickLinkRegion #tpmsTireFitmentQuickAccess"
+      ],
+      "human_readable": "Tire Information & Lifting Points \u2192 FOUND: Tire Pressure Monitoring System Programmable Senso",
+      "successes": 1,
+      "first_learned": "2026-01-10",
+      "last_success": "2026-01-10"
+    },
+    "tpms reset procedure": {
+      "steps": [
+        {
+          "action": "click",
+          "selector": "#quickLinkRegion #resetProceduresAccess",
+          "element_text": "Reset Procedures",
+          "context": "landing page",
+          "result": "FOUND: TPMS REMINDER RESET - PROCEDURE 01\nNOTE: Some earl..."
+        }
+      ],
+      "selectors": [
+        "#quickLinkRegion #resetProceduresAccess"
+      ],
+      "human_readable": "Reset Procedures \u2192 FOUND: TPMS REMINDER RESET - PROCEDURE 01\nNOTE: Some earl",
+      "successes": 1,
+      "first_learned": "2026-01-10",
+      "last_success": "2026-01-10"
+    },
+    "coolant capacity": {
+      "steps": [
+        {
+          "action": "click",
+          "selector": "#quickLinkRegion #fluidsQuickAccess",
+          "element_text": "Fluid Capacities",
+          "context": "landing page",
+          "result": "FOUND: , \"parameters\": {\"data\": \"Engine Coolant 2.4L Eng ..."
+        }
+      ],
+      "selectors": [
+        "#quickLinkRegion #fluidsQuickAccess"
+      ],
+      "human_readable": "Fluid Capacities \u2192 FOUND: , \"parameters\": {\"data\": \"Engine Coolant 2.4L Eng ",
+      "successes": 1,
+      "first_learned": "2026-01-10",
+      "last_success": "2026-01-10"
+    },
+    "engine oil capacity": {
+      "steps": [
+        {
+          "action": "click",
+          "selector": "#quickLinkRegion #fluidsQuickAccess",
+          "element_text": "Fluid Capacities",
+          "context": "landing page",
+          "result": "FOUND: Engine Oil 2.4L Eng w/Filter 4.50 QTS. 4.25 L API ..."
+        }
+      ],
+      "selectors": [
+        "#quickLinkRegion #fluidsQuickAccess"
+      ],
+      "human_readable": "Fluid Capacities \u2192 FOUND: Engine Oil 2.4L Eng w/Filter 4.50 QTS. 4.25 L API ",
+      "successes": 1,
+      "first_learned": "2026-01-10",
+      "last_success": "2026-01-10"
+    },
+    "transmission fluid capacity": {
+      "steps": [
+        {
+          "action": "click",
+          "selector": "#quickLinkRegion #fluidsQuickAccess",
+          "element_text": "Fluid Capacities",
+          "context": "landing page",
+          "result": "FOUND: 9.20 QTS. 8.7 L..."
+        }
+      ],
+      "selectors": [
+        "#quickLinkRegion #fluidsQuickAccess"
+      ],
+      "human_readable": "Fluid Capacities \u2192 FOUND: 9.20 QTS. 8.7 L",
+      "successes": 1,
+      "first_learned": "2026-01-10",
+      "last_success": "2026-01-10"
+    },
+    "lug nut torque": {
+      "steps": [
+        {
+          "action": "click",
+          "selector": "#quickLinkRegion #commonSpecsAccess",
+          "element_text": "Common Specs",
+          "context": "landing page",
+          "result": "FOUND: 100 Ft. Lbs. (135 N.m)..."
+        }
+      ],
+      "selectors": [
+        "#quickLinkRegion #commonSpecsAccess"
+      ],
+      "human_readable": "Common Specs \u2192 FOUND: 100 Ft. Lbs. (135 N.m)",
+      "successes": 1,
+      "first_learned": "2026-01-10",
+      "last_success": "2026-01-10"
+    },
+    "brake fluid type": {
+      "steps": [
+        {
+          "action": "click",
+          "selector": "#quickLinkRegion #fluidsQuickAccess",
+          "element_text": "Fluid Capacities",
+          "context": "landing page",
+          "result": "FOUND: Brake Fluid N/A N/A DOT 3 Brake Fluid S..."
+        }
+      ],
+      "selectors": [
+        "#quickLinkRegion #fluidsQuickAccess"
+      ],
+      "human_readable": "Fluid Capacities \u2192 FOUND: Brake Fluid N/A N/A DOT 3 Brake Fluid S",
+      "successes": 1,
+      "first_learned": "2026-01-10",
+      "last_success": "2026-01-10"
+    },
+    "how much oil does this engine hold": {
+      "steps": [
+        {
+          "action": "click",
+          "selector": "#quickLinkRegion #fluidsQuickAccess",
+          "element_text": "Fluid Capacities",
+          "context": "landing page",
+          "result": "FOUND: 9.20 QTS. 8.7 L..."
+        }
+      ],
+      "selectors": [
+        "#quickLinkRegion #fluidsQuickAccess"
+      ],
+      "human_readable": "Fluid Capacities \u2192 FOUND: 9.20 QTS. 8.7 L",
+      "successes": 1,
+      "first_learned": "2026-01-10",
+      "last_success": "2026-01-10"
+    }
+  },
+  "failed_paths": {},
+  "last_updated": "2026-01-10T17:16:23.146901"
+}

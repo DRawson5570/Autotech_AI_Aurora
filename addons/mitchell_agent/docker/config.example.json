@@ -1,0 +1,11 @@
+{
+  "shop_id": "your-unique-shop-id",
+  "shop_name": "Your Shop Name",
+  "server_url": "https://automotive.aurora-sentient.net",
+  "mitchell_username": "your-shopkeypro-username",
+  "mitchell_password": "your-shopkeypro-password",
+  "poll_interval": 2.0,
+  "error_backoff": 10.0,
+  "headless": true,
+  "log_level": "INFO"
+}

@@ -1,0 +1,19 @@
+# Mitchell Agent artifacts and generated files
+artifacts/
+storage_state.json
+.agent_id
+
+# Training data
+training_data/
+
+# Environment files (contain secrets)
+.env
+!.env.example
+
+# Archive of old/deprecated code
+_archive/
+
+*.pyc
+
+# Debug artifacts
+*.log

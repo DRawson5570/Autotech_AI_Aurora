@@ -1,0 +1,148 @@
+{
+  "trace": [
+    [
+      {
+        "scenario_id": "EDM_001",
+        "predictions": [
+          {
+            "hypothesis": "Cooling pump failure",
+            "prob": 0.85,
+            "reason": [
+              "inverter THERMAL_DERATE",
+              "coolant temp 80\u00b0C+",
+              "Ia_max high"
+            ],
+            "tests": [
+              "measure pump_motor_current_last_60s_mean",
+              "measure pump_motor_current_history",
+              "measure coolant_inlet_temp_last_60s_mean",
+              "measure coolant_outlet_temp_last_60s_mean"
+            ],
+            "mitigation": "limit torque, schedule pump inspection and replacement"
+          }
+        ],
+        "requested_measurements": [
+          "pump_motor_current_last_60s_mean",
+          "pump_motor_current_history",
+          "coolant_inlet_temp_last_60s_mean",
+          "coolant_outlet_temp_last_60s_mean"
+        ],
+        "explanation": "Thermal derate and sustained high coolant temp point to pump failure; current signatures will confirm blockage or motor stall."
+      },
+      {
+        "pump_motor_current_last_60s_mean": "NOT_AVAILABLE",
+        "pump_motor_current_history": [
+          2.0968245592371293,
+          2.119060067886792,
+          2.0314746305589586,
+          2.1282792856102715,
+          2.0228460681732323,
+          1.8728144815499117,
+          1.95071310521756,
+          0.1047940332800548,
+          0.0932309624022657,
+          0.1061789144649707,
+          0.0987794564073895,
+          0.1065395781188992,
+          0.1037216679437483,
+          0.1058314415326624,
+          0.0992441580965472,
+          0.0991985352858849,
+          0.0982416031019474,
+          0.0969544842808834,
+          0.0948786883282056,
+          0.1015914560132655
+        ],
+        "coolant_inlet_temp_last_60s_mean": "NOT_AVAILABLE",
+        "coolant_outlet_temp_last_60s_mean": "NOT_AVAILABLE"
+      }
+    ],
+    [
+      {
+        "scenario_id": "EDM_001",
+        "predictions": [
+          {
+            "hypothesis": "Cooling pump failure",
+            "prob": 0.78,
+            "reason": [
+              "high coolant temp (~80\u00b0C)",
+              "inverter THERMAL_DERATE",
+              "pump current history drops to near zero"
+            ],
+            "tests": [
+              "measure coolant_inlet_temp_last_60s_mean",
+              "measure coolant_outlet_temp_last_60s_mean"
+            ],
+            "mitigation": "limit torque and schedule immediate pump inspection"
+          }
+        ],
+        "requested_measurements": [
+          "coolant_inlet_temp_last_60s_mean",
+          "coolant_outlet_temp_last_60s_mean"
+        ],
+        "explanation": "The abrupt drop in motor current suggests loss of load, consistent with a failed pump, while high coolant temperature and thermal derate confirm cooling system distress."
+      },
+      {
+        "coolant_inlet_temp_last_60s_mean": "NOT_AVAILABLE",
+        "coolant_outlet_temp_last_60s_mean": "NOT_AVAILABLE"
+      }
+    ],
+    [
+      {
+        "scenario_id": "EDM_001",
+        "predictions": [
+          {
+            "hypothesis": "Cooling pump failure",
+            "prob": 0.8,
+            "reason": [
+              "high coolant temp (~80\u00b0C)",
+              "inverter THERMAL_DERATE",
+              "absence of pump load data"
+            ],
+            "tests": [
+              "measure pump_motor_current_last_60s_mean",
+              "measure pump_motor_current_history",
+              "measure coolant_inlet_temp_last_60s_mean",
+              "measure coolant_outlet_temp_last_60s_mean"
+            ],
+            "mitigation": "limit torque and schedule immediate pump inspection"
+          }
+        ],
+        "requested_measurements": [
+          "pump_motor_current_last_60s_mean",
+          "pump_motor_current_history",
+          "coolant_inlet_temp_last_60s_mean",
+          "coolant_outlet_temp_last_60s_mean"
+        ],
+        "explanation": "High coolant temp and thermal derate flag suggest cooling failure; pump current data is needed to confirm loss of load."
+      },
+      {
+        "pump_motor_current_last_60s_mean": "NOT_AVAILABLE",
+        "pump_motor_current_history": [
+          2.0968245592371293,
+          2.119060067886792,
+          2.0314746305589586,
+          2.1282792856102715,
+          2.0228460681732323,
+          1.8728144815499117,
+          1.95071310521756,
+          0.1047940332800548,
+          0.0932309624022657,
+          0.1061789144649707,
+          0.0987794564073895,
+          0.1065395781188992,
+          0.1037216679437483,
+          0.1058314415326624,
+          0.0992441580965472,
+          0.0991985352858849,
+          0.0982416031019474,
+          0.0969544842808834,
+          0.0948786883282056,
+          0.1015914560132655
+        ],
+        "coolant_inlet_temp_last_60s_mean": "NOT_AVAILABLE",
+        "coolant_outlet_temp_last_60s_mean": "NOT_AVAILABLE"
+      }
+    ]
+  ]
+}

@@ -1,0 +1,1 @@
+cd /home/drawson/autotech_ai && conda activate open-webui && cd addons/mitchell_agent && python test_chat_e2e.py --query "What is connector X310 on a 2018 Ford F-150 5.0L? Get all connector info from the page." --model "gemini-2.5-pro"

@@ -1,0 +1,59 @@
+{
+  "trace": [
+    [
+      {
+        "scenario_id": "EDM_008",
+        "predictions": [
+          {
+            "hypothesis": "CAN message loss / gateway fault",
+            "prob": 0.88,
+            "reason": [
+              "high CAN_drops_total",
+              "inverter status OK",
+              "no abnormal currents",
+              "normal Vdc"
+            ],
+            "tests": [
+              "measure CAN bus error counters",
+              "check gateway health status",
+              "inspect wiring for shorts"
+            ],
+            "mitigation": "reboot or replace gateway component"
+          }
+        ],
+        "requested_measurements": [
+          "CAN_drops_total"
+        ],
+        "explanation": "Large drop count with otherwise normal telemetry points to a CAN bus issue."
+      },
+      {
+        "CAN_drops_total": 210
+      }
+    ],
+    [
+      {
+        "scenario_id": "EDM_008",
+        "predictions": [
+          {
+            "hypothesis": "CAN message loss / gateway fault",
+            "prob": 0.9,
+            "reason": [
+              "high CAN_drops_total",
+              "inverter status OK",
+              "normal Ia and Vdc"
+            ],
+            "tests": [
+              "measure CAN bus error counters",
+              "check gateway health status",
+              "inspect wiring for shorts"
+            ],
+            "mitigation": "reboot or replace gateway component"
+          }
+        ],
+        "requested_measurements": [],
+        "explanation": "Large CAN drop count with otherwise normal telemetry indicates a CAN bus or gateway fault."
+      },
+      {}
+    ]
+  ]
+}

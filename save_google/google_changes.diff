@@ -1,0 +1,1518 @@
+diff --git a/backend/open_webui/config.py b/backend/open_webui/config.py
+index c5ac40b..42c6536 100644
+--- a/backend/open_webui/config.py
++++ b/backend/open_webui/config.py
+@@ -1079,6 +1079,39 @@ OPENAI_API_CONFIGS = PersistentConfig(
+     {},
+ )
+ 
++# GOOGLE Generative API
++ENABLE_GOOGLE_API = PersistentConfig(
++    "ENABLE_GOOGLE_API",
++    "google.enable",
++    os.environ.get("ENABLE_GOOGLE_API", "False").lower() == "true",
++)
++
++GOOGLE_API_BASE_URL = os.environ.get("GOOGLE_API_BASE_URL", "https://generativelanguage.googleapis.com/v1")
++
++GOOGLE_API_KEYS = os.environ.get("GOOGLE_API_KEYS", "")
++GOOGLE_API_KEYS = GOOGLE_API_KEYS if GOOGLE_API_KEYS != "" else os.environ.get("GOOGLE_API_KEY", "")
++GOOGLE_API_KEYS = [url.strip() for url in GOOGLE_API_KEYS.split(";") if url.strip()]
++GOOGLE_API_KEYS = PersistentConfig(
++    "GOOGLE_API_KEYS",
++    "google.api_keys",
++    GOOGLE_API_KEYS,
++)
++
++GOOGLE_API_BASE_URLS = os.environ.get("GOOGLE_API_BASE_URLS", "")
++GOOGLE_API_BASE_URLS = (
++    GOOGLE_API_BASE_URLS
++    if GOOGLE_API_BASE_URLS != ""
++    else GOOGLE_API_BASE_URL
++)
++GOOGLE_API_BASE_URLS = [
++    url.strip() if url != "" else GOOGLE_API_BASE for url in GOOGLE_API_BASE_URLS.split(";")
++]
++GOOGLE_API_BASE_URLS = PersistentConfig(
++    "GOOGLE_API_BASE_URLS",
++    "google.api_base_urls",
++    GOOGLE_API_BASE_URLS,
++)
++
+ # Get the actual OpenAI API key based on the base URL
+ OPENAI_API_KEY = ""
+ try:
+diff --git a/backend/open_webui/routers/google.py b/backend/open_webui/routers/google.py
+new file mode 100644
+index 0000000..fce0ff4
+--- /dev/null
++++ b/backend/open_webui/routers/google.py
+@@ -0,0 +1,236 @@
++import asyncio
++import json
++import logging
++from typing import Optional
++
++import aiohttp
++from aiocache import cached
++from fastapi import APIRouter, Depends, HTTPException, Request
++from fastapi.responses import HTMLResponse
++from pydantic import BaseModel
++
++from open_webui.utils.auth import get_admin_user
++from open_webui.models.users import UserModel
++from open_webui.constants import ERROR_MESSAGES
++from open_webui.env import (
++    AIOHTTP_CLIENT_SESSION_SSL,
++    AIOHTTP_CLIENT_TIMEOUT_MODEL_LIST,
++)
++from open_webui.utils.oauth import encrypt_data, decrypt_data
++
++log = logging.getLogger(__name__)
++router = APIRouter()
++
++
++async def send_get_request(url, key=None, user: UserModel = None):
++    timeout = aiohttp.ClientTimeout(total=AIOHTTP_CLIENT_TIMEOUT_MODEL_LIST)
++    try:
++        async with aiohttp.ClientSession(timeout=timeout, trust_env=True) as session:
++            headers = {"Content-Type": "application/json"}
++            if key:
++                # Prefer Authorization header with Bearer token
++                headers["Authorization"] = f"Bearer {key}"
++
++            async with session.get(url, headers=headers, ssl=AIOHTTP_CLIENT_SESSION_SSL) as response:
++                if response.status != 200:
++                    # try with key as query param if provided
++                    if key:
++                        async with session.get(f"{url}?key={key}", ssl=AIOHTTP_CLIENT_SESSION_SSL) as r2:
++                            if r2.status == 200:
++                                return await r2.json()
++                            else:
++                                log.error(f"Google API returned status {r2.status} for {url}")
++                                return None
++                    log.error(f"Google API returned status {response.status} for {url}")
++                    return None
++                return await response.json()
++    except Exception as e:
++        log.exception(e)
++        return None
++
++
++@cached(ttl=60, key=lambda _, user: f"google_all_models_{user.id}" if user else "google_all_models")
++async def get_all_models(request: Request, user: UserModel = None) -> list:
++    log.info("google.get_all_models()")
++    if not request.app.state.config.ENABLE_GOOGLE_API:
++        return []
++
++    request_tasks = []
++    # Try to read key from model provider credentials (encrypted) first
++    creds = getattr(request.app.state.config, "MODEL_PROVIDER_CREDENTIALS", None) or {}
++    google_creds = creds.get("google", {})
++
++    for idx, url in enumerate(getattr(request.app.state.config, "GOOGLE_API_BASE_URLS", []) or []):
++        # Determine key to use
++        key = None
++        if google_creds.get("api_key_encrypted"):
++            try:
++                decrypted = decrypt_data(google_creds.get("api_key_encrypted"))
++                key = decrypted.get("api_key") if isinstance(decrypted, dict) else None
++            except Exception as e:
++                log.debug(f"Failed to decrypt google api key: {e}")
++        # Fallback to plaintext config if set (legacy)
++        if not key:
++            keys = getattr(request.app.state.config, "GOOGLE_API_KEYS", []) or []
++            if len(keys) > idx:
++                key = keys[idx]
++
++        request_tasks.append(send_get_request(f"{url}/models", key, user=user))
++
++    responses = await asyncio.gather(*request_tasks)
++
++    models = []
++    for idx, response in enumerate(responses):
++        if not response:
++            continue
++        # Google models list may be in different formats, attempt to normalize
++        # Expecting response: {"models": [{"name": "models/gemini-...", "displayName": "Gemini"}, ...]}
++        # Or {"models": [{"name": "...", "id": "..."}, ...]}
++        for m in response.get("models", []) if isinstance(response, dict) else []:
++            model_id = m.get("name") or m.get("id") or m.get("model")
++            if model_id and model_id.startswith("models/"):
++                # shorten to e.g., gemini-3.0
++                model_id = model_id.split("/")[-1]
++
++            model_name = m.get("displayName") or m.get("name") or model_id
++
++            models.append(
++                {
++                    "id": model_id,
++                    "name": model_name,
++                    "object": "model",
++                    "created": 0,
++                    "owned_by": "google",
++                    "google": m,
++                }
++            )
++
++    return models
++
++
++class GoogleConfigForm(BaseModel):
++    ENABLE_GOOGLE_API: Optional[bool] = None
++    GOOGLE_API_BASE_URLS: list[str]
++    GOOGLE_API_KEYS: list[str]
++
++
++@router.get("/config")
++async def get_config(request: Request, user=Depends(get_admin_user)):
++    return {
++        "ENABLE_GOOGLE_API": request.app.state.config.ENABLE_GOOGLE_API,
++        "GOOGLE_API_BASE_URLS": request.app.state.config.GOOGLE_API_BASE_URLS,
++        # Do not return plaintext api keys if encrypted credentials exist
++        "GOOGLE_API_KEYS": request.app.state.config.GOOGLE_API_KEYS,
++        "MODEL_PROVIDER_CREDENTIALS": getattr(request.app.state.config, "MODEL_PROVIDER_CREDENTIALS", {}),
++    }
++
++
++@router.post("/config/update")
++async def update_config(request: Request, form_data: GoogleConfigForm, user=Depends(get_admin_user)):
++    request.app.state.config.ENABLE_GOOGLE_API = form_data.ENABLE_GOOGLE_API
++    request.app.state.config.GOOGLE_API_BASE_URLS = form_data.GOOGLE_API_BASE_URLS
++    # plaintext keys will be stored only for backward compatibility; recommend using encrypted model provider credentials
++    request.app.state.config.GOOGLE_API_KEYS = form_data.GOOGLE_API_KEYS
++
++    return {
++        "ENABLE_GOOGLE_API": request.app.state.config.ENABLE_GOOGLE_API,
++        "GOOGLE_API_BASE_URLS": request.app.state.config.GOOGLE_API_BASE_URLS,
++        "GOOGLE_API_KEYS": request.app.state.config.GOOGLE_API_KEYS,
++    }
++
++
++class ConnectionVerificationForm(BaseModel):
++    url: str
++    key: Optional[str] = None
++
++
++@router.post("/verify")
++async def verify_connection(form_data: ConnectionVerificationForm, user=Depends(get_admin_user)):
++    url = form_data.url
++    key = form_data.key
++
++    try:
++        async with aiohttp.ClientSession(
++            trust_env=True,
++            timeout=aiohttp.ClientTimeout(total=AIOHTTP_CLIENT_TIMEOUT_MODEL_LIST),
++        ) as session:
++            headers = {"Content-Type": "application/json"}
++            if key:
++                headers["Authorization"] = f"Bearer {key}"
++
++            async with session.get(f"{url}/models", headers=headers, ssl=AIOHTTP_CLIENT_SESSION_SSL) as r:
++                if r.status != 200:
++                    # try with ?key= fallback
++                    async with session.get(f"{url}/models?key={key}", ssl=AIOHTTP_CLIENT_SESSION_SSL) as r2:
++                        if r2.status != 200:
++                            raise Exception(f"HTTP Error: {r.status}")
++                        return await r2.json()
++                return await r.json()
++
++    except Exception as e:
++        log.exception(e)
++        raise HTTPException(status_code=400, detail=f"Failed to connect to Google models endpoint: {e}")
++
++
++class ProviderCredentialsForm(BaseModel):
++    provider: str
++    api_key: Optional[str] = None
++
++
++@router.post("/credentials/set")
++async def set_credentials(request: Request, form_data: ProviderCredentialsForm, user=Depends(get_admin_user)):
++    # Store encrypted provider API key in persistent config under MODEL_PROVIDER_CREDENTIALS
++    creds = getattr(request.app.state.config, "MODEL_PROVIDER_CREDENTIALS", None) or {}
++    if form_data.api_key:
++        encrypted = encrypt_data(json.dumps({"api_key": form_data.api_key}))
++        creds[form_data.provider] = {"api_key_encrypted": encrypted}
++    else:
++        # remove
++        if form_data.provider in creds:
++            del creds[form_data.provider]
++
++    request.app.state.config.MODEL_PROVIDER_CREDENTIALS = creds
++    return {"status": True}
++
++
++@router.get("/credentials/get")
++async def get_credentials(request: Request, provider: str, user=Depends(get_admin_user)):
++    creds = getattr(request.app.state.config, "MODEL_PROVIDER_CREDENTIALS", None) or {}
++    provider_creds = creds.get(provider, {})
++    if provider_creds.get("api_key_encrypted"):
++        # return masked
++        return {"masked": True, "value": "****"}
++    return {"masked": False, "value": None}
++
++
++@router.get("/admin/ui")
++async def admin_ui(user=Depends(get_admin_user)):
++    # Minimal admin UI to set Google API key and test connection
++    html = '''<!doctype html>
++<html><head><meta charset="utf-8"><title>Google Connection</title></head>
++<body>
++  <h1>Google Connection</h1>
++  <div>
++    <label>API Key: <input id="api_key" type="text" /></label>
++    <button onclick="setKey()">Save</button>
++    <button onclick="testKey()">Test</button>
++  </div>
++  <pre id="out"></pre>
++  <script>
++  async function setKey(){
++    const api_key = document.getElementById('api_key').value;
++    const res = await fetch('/api/v1/google/credentials/set',{
++      method:'POST',headers:{'Content-Type':'application/json'},
++      body: JSON.stringify({provider:'google', api_key})
++    });
++    document.getElementById('out').innerText = await res.text();
++  }
++  async function testKey(){
++    const url = document.getElementById('api_key').value ? '' : '';
++    const api_key = document.getElementById('api_key').value;
++    const res = await fetch('/api/v1/google/verify',{method:'POST',headers:{'Content-Type':'application/json'}, body: JSON.stringify({url:'https://generativelanguage.googleapis.com/v1', key: api_key})});
++    document.getElementById('out').innerText = await res.text();
++  }
++  </script>
++</body></html>'''
++    return HTMLResponse(content=html, status_code=200)
+diff --git a/backend/open_webui/routers/openai.py b/backend/open_webui/routers/openai.py
+index d5bdf50..8ba5570 100644
+--- a/backend/open_webui/routers/openai.py
++++ b/backend/open_webui/routers/openai.py
+@@ -764,6 +764,53 @@ def is_openai_reasoning_model(model: str) -> bool:
+     return model.lower().startswith(("o1", "o3", "o4", "gpt-5"))
+ 
+ 
++# Helper to extract text from Google response shapes
++def _extract_text_from_google_response(res):
++    """Return a plain text string extracted from common Google generative response shapes."""
++    text_out = None
++    if isinstance(res, dict):
++        # 'candidates' with content.parts is common
++        if "candidates" in res and isinstance(res.get("candidates"), list) and len(res.get("candidates")) > 0:
++            c = res.get("candidates")[0]
++            if isinstance(c, dict):
++                cont = c.get("content") or c.get("output") or c.get("text")
++                if isinstance(cont, dict):
++                    # content may have parts
++                    if isinstance(cont.get("parts"), list):
++                        parts = [p.get("text", "") for p in cont.get("parts") if isinstance(p, dict) and "text" in p]
++                        text_out = "\n".join(parts) if parts else None
++                    else:
++                        text_out = cont.get("text") or cont.get("output")
++                elif isinstance(cont, list):
++                    parts = [p.get("text", "") for p in cont if isinstance(p, dict) and p.get("type") == "text"]
++                    text_out = "\n".join(parts) if parts else None
++                else:
++                    text_out = cont
++        elif "output" in res:
++            out = res.get("output")
++            if isinstance(out, list):
++                parts = []
++                for part in out:
++                    if isinstance(part, dict) and part.get("type") == "text":
++                        parts.append(part.get("text", ""))
++                text_out = "\n".join(parts) if parts else None
++        elif "candidates" not in res and "output" not in res and "content" in res:
++            content_top = res.get("content")
++            if isinstance(content_top, dict) and isinstance(content_top.get("parts"), list):
++                parts = [p.get("text", "") for p in content_top.get("parts") if isinstance(p, dict) and "text" in p]
++                text_out = "\n".join(parts) if parts else None
++            else:
++                text_out = content_top
++
++    if not text_out and isinstance(res, str):
++        text_out = res
++
++    if not text_out:
++        text_out = ""
++
++    return text_out
++
++
+ def convert_to_azure_payload(url, payload: dict, api_version: str):
+     model = payload.get("model", "")
+ 
+@@ -806,7 +853,15 @@ async def generate_chat_completion(
+     payload = {**form_data}
+     metadata = payload.pop("metadata", None)
+ 
++    # Enforce admin-configured defaults for non-admin users
++    from open_webui.utils.misc import effective_model_for_user, sanitize_response_models, sanitize_sse_stream
++
+     model_id = form_data.get("model")
++    effective = effective_model_for_user(request.app, user, model_id)
++    if effective and effective != model_id:
++        payload["model"] = effective
++        model_id = effective
++
+     model_info = Models.get_model_by_id(model_id)
+ 
+     # Check model info and override the payload
+@@ -852,10 +907,189 @@ async def generate_chat_completion(
+     if model:
+         idx = model["urlIdx"]
+     else:
+-        raise HTTPException(
+-            status_code=404,
+-            detail="Model not found",
+-        )
++        # Not found in OpenAI models - check base models for other providers (e.g., Google)
++        from open_webui.utils.models import get_all_base_models
++
++        base_models = await get_all_base_models(request, user=user)
++        google_model = None
++        for m in base_models:
++            if isinstance(m, dict) and m.get("id") == model_id and m.get("owned_by") == "google":
++                google_model = m
++                break
++
++        if google_model:
++            # Dispatch to Google Generative API for simple text generation (basic compatibility layer)
++            # Determine base URL and key
++            urls = getattr(request.app.state.config, "GOOGLE_API_BASE_URLS", []) or []
++            keys = getattr(request.app.state.config, "GOOGLE_API_KEYS", []) or []
++
++            if len(urls) == 0:
++                raise HTTPException(status_code=500, detail="Google API base URL not configured")
++
++            base_url = urls[0]
++            api_key = None
++            # Try encrypted provider credentials first
++            creds = getattr(request.app.state.config, "MODEL_PROVIDER_CREDENTIALS", None) or {}
++            google_creds = creds.get("google", {})
++            if google_creds.get("api_key_encrypted"):
++                try:
++                    from open_webui.utils.oauth import decrypt_data
++
++                    decrypted = decrypt_data(google_creds.get("api_key_encrypted"))
++                    api_key = decrypted.get("api_key") if isinstance(decrypted, dict) else None
++                except Exception:
++                    api_key = None
++
++            if not api_key:
++                api_key = keys[0] if len(keys) > 0 else None
++
++            if not api_key:
++                raise HTTPException(status_code=500, detail="Google API key not configured")
++
++            # Compose a simple prompt from messages (system + conversation)
++            messages = payload.get("messages", [])
++            composed = ""
++            try:
++                for msg in messages:
++                    role = msg.get("role", "user")
++                    content = ""
++                    if isinstance(msg.get("content"), list):
++                        # openai style content list
++                        for part in msg.get("content"):
++                            if isinstance(part, dict) and part.get("type") == "text":
++                                content += part.get("text", "")
++                            elif isinstance(part, str):
++                                content += part
++                    elif isinstance(msg.get("content"), str):
++                        content = msg.get("content")
++
++                    composed += f"{role.upper()}: {content}\n"
++            except Exception:
++                composed = ""
++
++            # Map some params
++            google_payload = {
++                "prompt": {"text": composed or payload.get("prompt", "")},
++            }
++            if payload.get("temperature") is not None:
++                google_payload["temperature"] = payload.get("temperature")
++            if payload.get("max_completion_tokens") is not None:
++                google_payload["max_output_tokens"] = payload.get("max_completion_tokens")
++            elif payload.get("max_tokens") is not None:
++                google_payload["max_output_tokens"] = payload.get("max_tokens")
++
++            # Call Google generate endpoint
++            import aiohttp
++
++            try:
++                async with aiohttp.ClientSession(trust_env=True) as session:
++                    # Determine whether to use query param API key (common Google API keys start with 'AIza')
++                    use_key_param = isinstance(api_key, str) and api_key.startswith("AIza")
++                    headers = {"Content-Type": "application/json"}
++                    if not use_key_param:
++                        headers["Authorization"] = f"Bearer {api_key}"
++
++                    # Prefer using the raw Google model name if provided in the provider metadata
++                    model_name = google_model.get("google", {}).get("name") or google_model.get("id")
++                    # Normalize model name: remove leading 'models/' if present
++                    if isinstance(model_name, str) and model_name.startswith("models/"):
++                        model_name = model_name.split("/", 1)[1]
++
++                    # Build candidate endpoints (generate and generateContent variants)
++                    endpoints = []
++                    if isinstance(model_name, str) and "/" in model_name:
++                        endpoints.append(f"{base_url}/{model_name}:generate")
++                        endpoints.append(f"{base_url}/{model_name}:generateContent")
++                    else:
++                        endpoints.append(f"{base_url}/models/{model_name}:generate")
++                        endpoints.append(f"{base_url}/models/{model_name}:generateContent")
++
++                    # Build a list of payload shapes to try for generateContent compatibility
++                    text_payload = composed or payload.get("prompt", "") or ""
++                    candidate_payloads = []
++                    # Preferred 'contents' payload (works for text and images)
++                    p_contents = {"contents": [{"parts": [{"text": text_payload}]}]}
++                    # Old-style prompt payload
++                    p1 = {"prompt": {"text": text_payload}}
++                    # Newer payload shapes
++                    p2 = {"input": [{"text": text_payload}]}
++                    p3 = {"input": {"text": text_payload}}
++                    p4 = {"instances": [{"input": {"text": text_payload}}]}
++                    for p in [p_contents, p1, p2, p3, p4]:
++                        # add temperature if provided
++                        if payload.get("temperature") is not None:
++                            p = p.copy()
++                            p["temperature"] = payload.get("temperature")
++                        candidate_payloads.append(p)
++
++                    last_error = None
++                    res = None
++
++                    # Try each endpoint and payload until one succeeds
++                    for endpoint in endpoints:
++                        for body_candidate in candidate_payloads:
++                            try:
++                                url = endpoint if not use_key_param else f"{endpoint}?key={api_key}"
++                                log.info(f"Trying Google endpoint {url} with payload keys: {list(body_candidate.keys())}")
++                                async with session.post(url, json=body_candidate, headers=headers if not use_key_param else {"Content-Type": "application/json"}) as r:
++                                    body_text = None
++                                    body_json = None
++                                    try:
++                                        body_json = await r.json()
++                                    except Exception:
++                                        try:
++                                            body_text = await r.text()
++                                        except Exception:
++                                            body_text = None
++
++                                    if r.status < 400:
++                                        res = body_json if body_json is not None else (body_text or {})
++                                        log.info(f"Google call succeeded: {url} status={r.status}")
++                                        break
++                                    else:
++                                        log.warning(f"Google API returned status {r.status} for {url}: json={body_json} text={body_text}")
++                                        last_error = (r.status, body_json or body_text)
++                                        # continue trying
++                            except Exception as e:
++                                log.exception(e)
++                                last_error = (None, str(e))
++                        if res is not None:
++                            break
++
++                    if res is None:
++                        # None of the attempts succeeded; surface last error
++                        status_code, body = last_error if last_error else (500, "No response from Google")
++                        raise HTTPException(status_code=status_code or 500, detail={"google_error": body})
++
++# Extract text from Google response using helper
++                        from open_webui.routers.openai import _extract_text_from_google_response
++                        text_out = _extract_text_from_google_response(res)
++
++                    # Return an OpenAI-compatible response object
++                    return {
++                        "id": f"google-{model_name}",
++                        "object": "chat.completion",
++                        "choices": [
++                            {
++                                "message": {"role": "assistant", "content": text_out},
++                                "finish_reason": "stop",
++                            }
++                        ],
++                    }
++            except HTTPException:
++                raise
++            except Exception as e:
++                log.exception(e)
++                raise HTTPException(status_code=500, detail="Failed to call Google Generative API")
++
++
++# Helper to extract text from Google response shapes
++
++    # Not found at all
++    raise HTTPException(
++        status_code=404,
++        detail="Model not found",
++    )
+ 
+     # Get the API config for the model
+     api_config = request.app.state.config.OPENAI_API_CONFIGS.get(
+@@ -942,8 +1176,13 @@ async def generate_chat_completion(
+         # Check if response is SSE
+         if "text/event-stream" in r.headers.get("Content-Type", ""):
+             streaming = True
++            # Sanitize SSE stream for non-admins: remove model fields from data chunks
++            stream_iter = r.content
++            if user and getattr(user, "role", None) != "admin":
++                stream_iter = sanitize_sse_stream(r.content, is_admin=False)
++
+             return StreamingResponse(
+-                stream_chunks_handler(r.content),
++                stream_iter,
+                 status_code=r.status,
+                 headers=dict(r.headers),
+                 background=BackgroundTask(
+@@ -957,6 +1196,10 @@ async def generate_chat_completion(
+                 log.error(e)
+                 response = await r.text()
+ 
++            # Sanitize model fields for non-admin users
++            if user and getattr(user, "role", None) != "admin" and isinstance(response, (dict, list)):
++                response = sanitize_response_models(response, is_admin=False)
++
+             if r.status >= 400:
+                 if isinstance(response, (dict, list)):
+                     return JSONResponse(status_code=r.status, content=response)
+diff --git a/backend/open_webui/test/unit/test_google_response_parsing.py b/backend/open_webui/test/unit/test_google_response_parsing.py
+new file mode 100644
+index 0000000..bc1c077
+--- /dev/null
++++ b/backend/open_webui/test/unit/test_google_response_parsing.py
+@@ -0,0 +1,41 @@
++import sys
++import types
++import pytest
++
++# Prevent optional deps (e.g., azure) from breaking imports in unit tests
++sys.modules.setdefault('azure', types.ModuleType('azure'))
++azure_identity = types.ModuleType('azure.identity')
++azure_identity.DefaultAzureCredential = lambda *a, **k: None
++azure_identity.get_bearer_token_provider = lambda *a, **k: (None, None)
++sys.modules.setdefault('azure.identity', azure_identity)
++
++from open_webui.routers import openai
++
++
++def test_extract_from_candidates_content_parts():
++    res = {
++        "candidates": [
++            {"content": {"parts": [{"text": "Hello!"}]}, "finishReason": "STOP"}
++        ]
++    }
++
++    out = openai._extract_text_from_google_response(res)
++    assert out.strip() == "Hello!"
++
++
++def test_extract_from_output_list():
++    res = {"output": [{"type": "text", "text": "Output text."}]}
++    out = openai._extract_text_from_google_response(res)
++    assert "Output text." in out
++
++
++def test_extract_from_content_top():
++    res = {"content": {"parts": [{"text": "Top content"}]}}
++    out = openai._extract_text_from_google_response(res)
++    assert out.strip() == "Top content"
++
++
++def test_string_input_returns_itself():
++    res = "just a string"
++    out = openai._extract_text_from_google_response(res)
++    assert out == "just a string"
+diff --git a/backend/open_webui/test/unit/test_models_google_integration.py b/backend/open_webui/test/unit/test_models_google_integration.py
+new file mode 100644
+index 0000000..22427b0
+--- /dev/null
++++ b/backend/open_webui/test/unit/test_models_google_integration.py
+@@ -0,0 +1,41 @@
++import asyncio
++from types import SimpleNamespace
++from unittest.mock import patch
++import sys
++import types
++
++# Prevent optional dependencies from breaking imports during test collection
++sys.modules.setdefault("azure", types.ModuleType("azure"))
++azure_identity_mod = types.ModuleType("azure.identity")
++# provide dummy credentials provider functions/classes used in openai router
++setattr(azure_identity_mod, "DefaultAzureCredential", lambda: None)
++setattr(azure_identity_mod, "get_bearer_token_provider", lambda x, y: (lambda: None))
++sys.modules.setdefault("azure.identity", azure_identity_mod)
++from open_webui.utils import models as models_utils
++
++
++async def _run_get_all_base_models(enabled=True):
++    fake_config = SimpleNamespace(ENABLE_OPENAI_API=False, ENABLE_OLLAMA_API=False, ENABLE_GOOGLE_API=enabled)
++    fake_app_state = SimpleNamespace(config=fake_config)
++    fake_app = SimpleNamespace(state=fake_app_state)
++    fake_request = SimpleNamespace(app=fake_app)
++
++    return await models_utils.get_all_base_models(fake_request, user=None)
++
++
++def test_google_models_included():
++    sample_google_models = [
++        {"id": "gemini-3.0", "name": "Gemini 3.0", "object": "model", "created": 0, "owned_by": "google"}
++    ]
++
++    from unittest.mock import AsyncMock
++
++    with patch("open_webui.routers.google.get_all_models", new=AsyncMock(return_value=sample_google_models)):
++        res = asyncio.run(_run_get_all_base_models(enabled=True))
++        # Ensure our sample model is present
++        assert any(m["id"] == "gemini-3.0" for m in res)
++
++    with patch("open_webui.routers.google.get_all_models", new=AsyncMock(return_value=[])):
++        res = asyncio.run(_run_get_all_base_models(enabled=False))
++        # When disabled, google models should not be present
++        assert all(m.get("owned_by") != "google" for m in res if isinstance(m, dict))
+\ No newline at end of file
+diff --git a/backend/open_webui/utils/models.py b/backend/open_webui/utils/models.py
+index 431542d..cbe193e 100644
+--- a/backend/open_webui/utils/models.py
++++ b/backend/open_webui/utils/models.py
+@@ -8,6 +8,7 @@ from fastapi import Request
+ 
+ from open_webui.socket.utils import RedisDict
+ from open_webui.routers import openai, ollama
++from open_webui.routers import google
+ from open_webui.functions import get_function_models
+ 
+ 
+@@ -71,11 +72,16 @@ async def get_all_base_models(request: Request, user: UserModel = None):
+     )
+     function_task = get_function_models(request)
+ 
+-    openai_models, ollama_models, function_models = await asyncio.gather(
+-        openai_task, ollama_task, function_task
++    google_task = (
++        (google.get_all_models(request, user=user) if request.app.state.config.ENABLE_GOOGLE_API else asyncio.sleep(0, result=[]))
+     )
+ 
+-    return function_models + openai_models + ollama_models
++    openai_models, ollama_models, google_models, function_models = await asyncio.gather(
++        openai_task, ollama_task, google_task, function_task
++    )
++
++    # google.get_all_models returns a list of normalized models
++    return function_models + openai_models + google_models + ollama_models
+ 
+ 
+ async def get_all_models(request, refresh: bool = False, user: UserModel = None):
+diff --git a/scripts/setup_google_api.py b/scripts/setup_google_api.py
+new file mode 100644
+index 0000000..9573f02
+--- /dev/null
++++ b/scripts/setup_google_api.py
+@@ -0,0 +1,202 @@
++#!/usr/bin/env python3
++"""Small helper to validate a Google Generative API key and store it in Open WebUI config.
++
++Usage:
++  python3 scripts/setup_google_api.py [--apply] [--restart]
++
++--apply: actually write the key into the DB config (google.api_keys and model_provider.credentials)
++--restart: after applying, restart the local uvicorn backend so changes are loaded
++
++The script reads the API key from ~/gary_gemini_api_key by default.
++"""
++
++from __future__ import annotations
++import argparse
++import json
++import os
++import signal
++import subprocess
++import sys
++import time
++from pathlib import Path
++from typing import Any, Dict
++
++import requests
++
++ROOT = Path(__file__).resolve().parents[1]
++KEY_PATH = Path.home() / "gary_gemini_api_key"
++
++
++def read_key(path: Path) -> str:
++    if not path.exists():
++        raise FileNotFoundError(f"Key file not found: {path}")
++    return path.read_text().strip()
++
++
++def test_models_endpoint(base_url: str, key: str) -> Dict[str, Any]:
++    # Try Authorization Bearer first
++    headers = {"Content-Type": "application/json", "Authorization": f"Bearer {key}"}
++    try:
++        r = requests.get(f"{base_url}/models", headers=headers, timeout=10)
++        return {"status": r.status_code, "json": r.json() if r.content else None, "text": r.text}
++    except Exception as e:
++        return {"error": str(e)}
++
++
++def test_models_with_keyparam(base_url: str, key: str) -> Dict[str, Any]:
++    try:
++        r = requests.get(f"{base_url}/models?key={key}", timeout=10)
++        return {"status": r.status_code, "json": r.json() if r.content else None, "text": r.text}
++    except Exception as e:
++        return {"error": str(e)}
++
++
++def try_generate(base_url: str, model_name: str, key: str) -> Dict[str, Any]:
++    # Try several candidate endpoints and both Authorization header and ?key= fallback
++    payload = {"prompt": {"text": "Say hello in one line."}, "temperature": 0}
++    headers = {"Content-Type": "application/json", "Authorization": f"Bearer {key}"}
++
++    candidates = []
++    if "/" in model_name:
++        candidates.append(f"{base_url}/{model_name}:generate")
++        candidates.append(f"{base_url}/{model_name}:generateContent")
++    else:
++        candidates.append(f"{base_url}/models/{model_name}:generate")
++        candidates.append(f"{base_url}/models/{model_name}:generateContent")
++
++    for url in candidates:
++        try:
++            r = requests.post(url, headers=headers, json=payload, timeout=10)
++            try:
++                body = r.json()
++            except Exception:
++                body = r.text
++            if r.status_code < 400:
++                return {"url": url, "status": r.status_code, "body": body}
++            else:
++                # Try fallback with ?key= if header fails
++                r2 = requests.post(f"{url}?key={key}", json=payload, timeout=10)
++                try:
++                    body2 = r2.json()
++                except Exception:
++                    body2 = r2.text
++                if r2.status_code < 400:
++                    return {"url": f"{url}?key=<key>", "status": r2.status_code, "body": body2}
++                # otherwise record last attempt
++                last = {"url": url, "status": r.status_code, "body": body, "url_key_fallback": f"{url}?key=<key>", "status_key": r2.status_code, "body_key": body2}
++        except Exception as e:
++            last = {"url": url, "error": str(e)}
++    return last
++
++
++def apply_to_app(key: str, base_url: str) -> None:
++    # Import backend modules (run from project root)
++    sys.path.insert(0, str(ROOT / "backend"))
++    from open_webui import config as _config
++    from open_webui.utils.oauth import encrypt_data
++
++    print("Current google config:", _config.get_config_value("google.api_keys"))
++
++    # Encrypt provider credential similar to google.set_credentials
++    encrypted = encrypt_data(json.dumps({"api_key": key}))
++
++    # Build updated config copy
++    cfg = _config.CONFIG_DATA.copy() if isinstance(_config.CONFIG_DATA, dict) else {}
++    if "google" not in cfg:
++        cfg["google"] = {}
++    cfg["google"]["api_keys"] = [key]
++    cfg["google"]["enable"] = True
++
++    # model_provider.credentials path expected at model_provider.credentials
++    if "model_provider" not in cfg:
++        cfg["model_provider"] = {}
++    if "credentials" not in cfg["model_provider"]:
++        cfg["model_provider"]["credentials"] = {}
++    cfg["model_provider"]["credentials"]["google"] = {"api_key_encrypted": encrypted}
++
++    print("Saving config to DB (this will persist the key)")
++    success = _config.save_config(cfg)
++    if not success:
++        raise RuntimeError("Failed to save config to DB")
++    print("Saved config. Note: running backend process may need restart to pick up changes.")
++
++
++def restart_backend() -> None:
++    # Kill uvicorn processes and relaunch using the project's .venv python
++    print("Restarting backend (pkill uvicorn + start) ...")
++    subprocess.run(["pkill", "-f", "uvicorn open_webui.main"], check=False)
++    time.sleep(1)
++    # start in background capturing logs to backend.log
++    venv_python = ROOT / ".venv" / "bin" / "python"
++    if not venv_python.exists():
++        venv_python = Path(sys.executable)
++    cmd = [str(venv_python), "-m", "uvicorn", "open_webui.main:app", "--app-dir", "backend", "--port", "8082", "--host", "127.0.0.1", "--workers", "1"]
++    print("Running:", " ".join(cmd))
++    subprocess.Popen(cmd, stdout=open("backend.log", "a"), stderr=open("backend.log", "a"))
++    # wait briefly and show tail
++    time.sleep(3)
++    print("Tail of backend.log (last 30 lines):")
++    subprocess.run(["tail", "-n", "30", "backend.log"], check=False)
++
++
++def main():
++    parser = argparse.ArgumentParser()
++    parser.add_argument("--apply", action="store_true", help="Apply the key into app config (persist)")
++    parser.add_argument("--restart", action="store_true", help="Restart the backend after applying")
++    parser.add_argument("--keyfile", default=str(KEY_PATH), help="Path to the API key file")
++    args = parser.parse_args()
++
++    keyfile = Path(args.keyfile)
++    try:
++        key = read_key(keyfile)
++    except Exception as e:
++        print(f"Failed to read key file: {e}")
++        sys.exit(2)
++
++    # Read base URL from backend config if possible, else default
++    base_url = os.environ.get("GOOGLE_API_BASE_URL", "https://generativelanguage.googleapis.com/v1")
++    print("Testing models endpoint with Bearer token (may require OAuth token):")
++    r = test_models_endpoint(base_url, key)
++    print(r)
++
++    print("Testing models endpoint with ?key= param:")
++    r2 = test_models_with_keyparam(base_url, key)
++    print(r2)
++
++    # If we got a models list, pick a candidate model and try generate
++    model_name = None
++    for candidate in (r.get("json") or {}).get("models", []) if isinstance(r.get("json"), dict) else []:
++        mn = candidate.get("name") or candidate.get("id") or candidate.get("model")
++        if mn:
++            if mn.startswith("models/"):
++                mn = mn.split("/", 1)[1]
++            model_name = mn
++            break
++
++    if not model_name:
++        # try from r2
++        for candidate in (r2.get("json") or {}).get("models", []) if isinstance(r2.get("json"), dict) else []:
++            mn = candidate.get("name") or candidate.get("id") or candidate.get("model")
++            if mn:
++                if mn.startswith("models/"):
++                    mn = mn.split("/", 1)[1]
++                model_name = mn
++                break
++
++    if model_name:
++        print(f"Attempting generate with model: {model_name}")
++        gen = try_generate(base_url, model_name, key)
++        print(gen)
++
++    if args.apply:
++        apply_to_app(key, base_url)
++
++        if args.restart:
++            restart_backend()
++
++    else:
++        print("Run with --apply to persist the key into the app config and --restart to restart the backend.")
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/src/lib/apis/google/index.ts b/src/lib/apis/google/index.ts
+new file mode 100644
+index 0000000..888012e
+--- /dev/null
++++ b/src/lib/apis/google/index.ts
+@@ -0,0 +1,142 @@
++import { WEBUI_API_BASE_URL } from '$lib/constants';
++
++export const getGoogleConfig = async (token: string) => {
++	let error = null;
++
++	const res = await fetch(`${WEBUI_API_BASE_URL}/google/config`, {
++		method: 'GET',
++		headers: {
++			'Content-Type': 'application/json',
++			Authorization: `Bearer ${token}`
++		}
++	})
++		.then(async (res) => {
++			if (!res.ok) throw await res.json();
++			return res.json();
++		})
++		.catch((err) => {
++			console.error(err);
++			error = err.detail;
++			return null;
++		});
++
++	if (error) throw error;
++
++	return res;
++};
++
++export const updateGoogleConfig = async (token: string, config: object) => {
++	let error = null;
++
++	const res = await fetch(`${WEBUI_API_BASE_URL}/google/config/update`, {
++		method: 'POST',
++		headers: {
++			'Content-Type': 'application/json',
++			Authorization: `Bearer ${token}`
++		},
++		body: JSON.stringify(config)
++	})
++		.then(async (res) => {
++			if (!res.ok) throw await res.json();
++			return res.json();
++		})
++		.catch((err) => {
++			console.error(err);
++			error = err.detail;
++			return null;
++		});
++
++	if (error) throw error;
++
++	return res;
++};
++
++export const verifyGoogleConnection = async (token: string, formData: { url: string; key?: string }) => {
++	let error = null;
++
++	const res = await fetch(`${WEBUI_API_BASE_URL}/google/verify`, {
++		method: 'POST',
++		headers: {
++			'Content-Type': 'application/json',
++			Authorization: `Bearer ${token}`
++		},
++		body: JSON.stringify(formData)
++	})
++		.then(async (res) => {
++			if (!res.ok) {
++				let body;
++				try {
++					body = await res.json();
++				} catch (e) {
++					body = await res.text().catch(() => null);
++				}
++				const msg = (body && (body.detail || body.message || JSON.stringify(body))) || `HTTP ${res.status}`;
++				throw new Error(msg);
++			}
++			return res.json();
++		})
++		.catch((err) => {
++			console.error(err);
++			if (err && typeof err === 'object') {
++				error = err.message || err.detail || JSON.stringify(err);
++			} else {
++				error = String(err);
++			}
++			return null;
++		});
++
++	if (error) throw new Error(error);
++
++	return res;
++};
++
++export const setGoogleCredentials = async (token: string, formData: { provider: string; api_key?: string }) => {
++	let error = null;
++
++	const res = await fetch(`${WEBUI_API_BASE_URL}/google/credentials/set`, {
++		method: 'POST',
++		headers: {
++			'Content-Type': 'application/json',
++			Authorization: `Bearer ${token}`
++		},
++		body: JSON.stringify(formData)
++	})
++		.then(async (res) => {
++			if (!res.ok) throw await res.json();
++			return res.json();
++		})
++		.catch((err) => {
++			console.error(err);
++			error = err.detail;
++			return null;
++		});
++
++	if (error) throw error;
++
++	return res;
++};
++
++export const getGoogleCredentials = async (token: string, provider: string) => {
++	let error = null;
++
++	const res = await fetch(`${WEBUI_API_BASE_URL}/google/credentials/get?provider=${encodeURIComponent(provider)}`, {
++		method: 'GET',
++		headers: {
++			'Content-Type': 'application/json',
++			Authorization: `Bearer ${token}`
++		}
++	})
++		.then(async (res) => {
++			if (!res.ok) throw await res.json();
++			return res.json();
++		})
++		.catch((err) => {
++			console.error(err);
++			error = err.detail;
++			return null;
++		});
++
++	if (error) throw error;
++
++	return res;
++};
+diff --git a/src/lib/components/AddConnectionModal.svelte b/src/lib/components/AddConnectionModal.svelte
+index 5575490..d5c6143 100644
+--- a/src/lib/components/AddConnectionModal.svelte
++++ b/src/lib/components/AddConnectionModal.svelte
+@@ -6,6 +6,7 @@
+ 	import { settings } from '$lib/stores';
+ 	import { verifyOpenAIConnection } from '$lib/apis/openai';
+ 	import { verifyOllamaConnection } from '$lib/apis/ollama';
++	import { verifyGoogleConnection } from '$lib/apis/google';
+ 
+ 	import Modal from '$lib/components/common/Modal.svelte';
+ 	import Plus from '$lib/components/icons/Plus.svelte';
+@@ -26,6 +27,7 @@
+ 	export let edit = false;
+ 
+ 	export let ollama = false;
++	export let google = false;
+ 	export let direct = false;
+ 
+ 	export let connection = null;
+@@ -113,11 +115,42 @@
+ 	const verifyHandler = () => {
+ 		if (ollama) {
+ 			verifyOllamaHandler();
++		} else if (google) {
++			verifyGoogleHandler();
+ 		} else {
+ 			verifyOpenAIHandler();
+ 		}
+ 	};
+ 
++	let verifying = false;
++	let verifyError = '';
++	let verifySuccess = false;
++
++	const verifyGoogleHandler = async () => {
++		// remove trailing slash from url
++		url = url.replace(/\/$/, '');
++		verifyError = '';
++		verifySuccess = false;
++		verifying = true;
++		try {
++			const res = await verifyGoogleConnection(localStorage.token, {
++				url,
++				key
++			});
++
++			if (res) {
++				verifySuccess = true;
++				toast.success($i18n.t('Server connection verified'));
++			}
++		} catch (error) {
++			const msg = error?.message ?? String(error);
++			verifyError = msg;
++			toast.error(msg);
++		} finally {
++			verifying = false;
++		}
++	};
++
+ 	const addModelHandler = () => {
+ 		if (modelId) {
+ 			modelIds = [...modelIds, modelId];
+@@ -319,31 +352,36 @@
+ 									}}
+ 									type="button"
+ 									aria-label={$i18n.t('Verify Connection')}
+-								>
+-									<svg
+-										xmlns="http://www.w3.org/2000/svg"
+-										viewBox="0 0 20 20"
+-										fill="currentColor"
+-										aria-hidden="true"
+-										class="w-4 h-4"
+-									>
+-										<path
+-											fill-rule="evenodd"
+-											d="M15.312 11.424a5.5 5.5 0 01-9.201 2.466l-.312-.311h2.433a.75.75 0 000-1.5H3.989a.75.75 0 00-.75.75v4.242a.75.75 0 001.5 0v-2.43l.31.31a7 7 0 0011.712-3.138.75.75 0 00-1.449-.39zm1.23-3.723a.75.75 0 00.219-.53V2.929a.75.75 0 00-1.5 0V5.36l-.31-.31A7 7 0 003.239 8.188a.75.75 0 101.448.389A5.5 5.5 0 0113.89 6.11l.311.31h-2.432a.75.75 0 000 1.5h4.243a.75.75 0 00.53-.219z"
+-											clip-rule="evenodd"
+-										/>
+-									</svg>
+-								</button>
+-							</Tooltip>
++						disabled={verifying}
++						aria-busy={verifying}
++					>
++						{#if verifying}
++							<Spinner className="size-4" />
++						{:else}
++							<svg
++								xmlns="http://www.w3.org/2000/svg"
++								viewBox="0 0 20 20"
++								fill="currentColor"
++								aria-hidden="true"
++								class="w-4 h-4"
++							>
++								<path
++									fill-rule="evenodd"
++									d="M15.312 11.424a5.5 5.5 0 01-9.201 2.466l-.312-.311h2.433a.75.75 0 000-1.5H3.989a.75.75 0 00-.75.75v4.242a.75.75 0 001.5 0v-2.43l.31.31a7 7 0 0011.712-3.138.75.75 0 00-1.449-.39zm1.23-3.723a.75.75 0 00.219-.53V2.929a.75.75 0 00-1.5 0V5.36l-.31-.31A7 7 0 003.239 8.188a.75.75 0 101.448.389A5.5 5.5 0 0113.89 6.11l.311.31h-2.432a.75.75 0 000 1.5h4.243a.75.75 0 00.53-.219z"
++									clip-rule="evenodd"
++								/>
++							</svg>
++						{/if}
++					</button>
++				</Tooltip>
+ 
+-							<div class="flex flex-col shrink-0 self-end">
+-								<label class="sr-only" for="toggle-connection"
+-									>{$i18n.t('Toggle whether current connection is active.')}</label
+-								>
+-								<Tooltip content={enable ? $i18n.t('Enabled') : $i18n.t('Disabled')}>
+-									<Switch id="toggle-connection" bind:state={enable} />
+-								</Tooltip>
+-							</div>
++				{#if verifyError}
++					<div class="text-xs text-red-500 mt-1">{verifyError}</div>
++				{/if}
++
++				{#if verifySuccess}
++					<div class="text-xs text-green-500 mt-1">{$i18n.t('Server connection verified')}</div>
++				{/if}
+ 						</div>
+ 
+ 						<div class="flex gap-2 mt-2">
+diff --git a/src/lib/components/admin/Settings/Connections.svelte b/src/lib/components/admin/Settings/Connections.svelte
+index 32276ce..15c8006 100644
+--- a/src/lib/components/admin/Settings/Connections.svelte
++++ b/src/lib/components/admin/Settings/Connections.svelte
+@@ -6,6 +6,7 @@
+ 
+ 	import { getOllamaConfig, updateOllamaConfig } from '$lib/apis/ollama';
+ 	import { getOpenAIConfig, updateOpenAIConfig, getOpenAIModels } from '$lib/apis/openai';
++	import { getGoogleConfig, updateGoogleConfig } from '$lib/apis/google';
+ 	import { getModels as _getModels, getBackendConfig } from '$lib/apis';
+ 	import { getConnectionsConfig, setConnectionsConfig } from '$lib/apis/configs';
+ 
+@@ -15,7 +16,9 @@
+ 	import Spinner from '$lib/components/common/Spinner.svelte';
+ 	import Tooltip from '$lib/components/common/Tooltip.svelte';
+ 	import Plus from '$lib/components/icons/Plus.svelte';
+-
++import Minus from '$lib/components/icons/Minus.svelte';
++import PencilSolid from '$lib/components/icons/PencilSolid.svelte';
++import SensitiveInput from '$lib/components/common/SensitiveInput.svelte';
+ 	import OpenAIConnection from './Connections/OpenAIConnection.svelte';
+ 	import AddConnectionModal from '$lib/components/AddConnectionModal.svelte';
+ 	import OllamaConnection from './Connections/OllamaConnection.svelte';
+@@ -40,14 +43,20 @@
+ 	let OPENAI_API_BASE_URLS = [''];
+ 	let OPENAI_API_CONFIGS = {};
+ 
++	let GOOGLE_API_KEYS = [''];
++	let GOOGLE_API_BASE_URLS = [''];
++	let GOOGLE_API_CONFIGS = {};
++
+ 	let ENABLE_OPENAI_API: null | boolean = null;
+ 	let ENABLE_OLLAMA_API: null | boolean = null;
++	let ENABLE_GOOGLE_API: null | boolean = null;
+ 
+ 	let connectionsConfig = null;
+ 
+ 	let pipelineUrls = {};
+ 	let showAddOpenAIConnectionModal = false;
+ 	let showAddOllamaConnectionModal = false;
++	let showAddGoogleConnectionModal = false;
+ 
+ 	const updateOpenAIHandler = async () => {
+ 		if (ENABLE_OPENAI_API !== null) {
+@@ -106,6 +115,81 @@
+ 		}
+ 	};
+ 
++const updateGoogleHandler = async () => {
++	if (ENABLE_GOOGLE_API !== null) {
++		GOOGLE_API_BASE_URLS = GOOGLE_API_BASE_URLS.map((url) => url.replace(/\/$/, ''));
++
++		const res = await updateGoogleConfig(localStorage.token, {
++			ENABLE_GOOGLE_API: ENABLE_GOOGLE_API,
++			GOOGLE_API_BASE_URLS: GOOGLE_API_BASE_URLS,
++			GOOGLE_API_KEYS: GOOGLE_API_KEYS,
++			GOOGLE_API_CONFIGS: GOOGLE_API_CONFIGS
++		}).catch((error) => {
++			toast.error(`${error}`);
++		});
++
++		if (res) {
++			toast.success($i18n.t('Google API settings updated'));
++			await models.set(await getModels());
++		}
++	}
++};
++
++const addGoogleConnectionHandler = async (connection) => {
++	GOOGLE_API_BASE_URLS = [...GOOGLE_API_BASE_URLS, connection.url];
++	GOOGLE_API_KEYS = [...GOOGLE_API_KEYS, connection.key];
++	GOOGLE_API_CONFIGS[GOOGLE_API_BASE_URLS.length - 1] = connection.config;
++
++	await updateGoogleHandler();
++};
++
++// Edit helpers for Google connections
++let editingGoogleIdx = null;
++let editingGoogleConnection = null;
++
++const editGoogleConnection = (idx) => {
++	editingGoogleIdx = idx;
++	editingGoogleConnection = {
++		url: GOOGLE_API_BASE_URLS[idx],
++		key: GOOGLE_API_KEYS[idx],
++		config: GOOGLE_API_CONFIGS[idx] || {}
++	};
++	showAddGoogleConnectionModal = true;
++};
++
++const handleGoogleSubmit = async (connection) => {
++	if (editingGoogleIdx !== null) {
++		GOOGLE_API_BASE_URLS[editingGoogleIdx] = connection.url;
++		GOOGLE_API_KEYS[editingGoogleIdx] = connection.key;
++		GOOGLE_API_CONFIGS[editingGoogleIdx] = connection.config;
++		editingGoogleIdx = null;
++		editingGoogleConnection = null;
++	} else {
++		GOOGLE_API_BASE_URLS = [...GOOGLE_API_BASE_URLS, connection.url];
++		GOOGLE_API_KEYS = [...GOOGLE_API_KEYS, connection.key];
++		GOOGLE_API_CONFIGS[GOOGLE_API_BASE_URLS.length - 1] = connection.config;
++	}
++
++	await updateGoogleHandler();
++};
++
++const deleteGoogleConnectionHandler = async () => {
++	if (editingGoogleIdx !== null) {
++		const idx = editingGoogleIdx;
++		GOOGLE_API_BASE_URLS = GOOGLE_API_BASE_URLS.filter((_, i) => i !== idx);
++		GOOGLE_API_KEYS = GOOGLE_API_KEYS.filter((_, i) => i !== idx);
++		let newConfig = {};
++		GOOGLE_API_BASE_URLS.forEach((u, newIdx) => {
++			newConfig[newIdx] = GOOGLE_API_CONFIGS[newIdx < idx ? newIdx : newIdx + 1];
++		});
++		GOOGLE_API_CONFIGS = newConfig;
++		editingGoogleIdx = null;
++		editingGoogleConnection = null;
++		showAddGoogleConnectionModal = false;
++		await updateGoogleHandler();
++	}
++};
++
+ 	const updateConnectionsHandler = async () => {
+ 		const res = await setConnectionsConfig(localStorage.token, connectionsConfig).catch((error) => {
+ 			toast.error(`${error}`);
+@@ -140,27 +224,34 @@
+ 		if ($user?.role === 'admin') {
+ 			let ollamaConfig = {};
+ 			let openaiConfig = {};
+-
+-			await Promise.all([
+-				(async () => {
+-					ollamaConfig = await getOllamaConfig(localStorage.token);
+-				})(),
+-				(async () => {
+-					openaiConfig = await getOpenAIConfig(localStorage.token);
+-				})(),
+-				(async () => {
+-					connectionsConfig = await getConnectionsConfig(localStorage.token);
+-				})()
+-			]);
+-
+-			ENABLE_OPENAI_API = openaiConfig.ENABLE_OPENAI_API;
+-			ENABLE_OLLAMA_API = ollamaConfig.ENABLE_OLLAMA_API;
+-
+-			OPENAI_API_BASE_URLS = openaiConfig.OPENAI_API_BASE_URLS;
+-			OPENAI_API_KEYS = openaiConfig.OPENAI_API_KEYS;
+-			OPENAI_API_CONFIGS = openaiConfig.OPENAI_API_CONFIGS;
+-
+-			OLLAMA_BASE_URLS = ollamaConfig.OLLAMA_BASE_URLS;
++				let googleConfig = {};
++
++				await Promise.all([
++					(async () => {
++						ollamaConfig = await getOllamaConfig(localStorage.token);
++					})(),
++					(async () => {
++						openaiConfig = await getOpenAIConfig(localStorage.token);
++					})(),
++					(async () => {
++						googleConfig = await getGoogleConfig(localStorage.token);
++					})(),
++					(async () => {
++						connectionsConfig = await getConnectionsConfig(localStorage.token);
++					})()
++				]);
++
++				ENABLE_OPENAI_API = openaiConfig.ENABLE_OPENAI_API;
++				ENABLE_OLLAMA_API = ollamaConfig.ENABLE_OLLAMA_API;
++				ENABLE_GOOGLE_API = googleConfig.ENABLE_GOOGLE_API;
++
++				OPENAI_API_BASE_URLS = openaiConfig.OPENAI_API_BASE_URLS;
++				OPENAI_API_KEYS = openaiConfig.OPENAI_API_KEYS;
++				OPENAI_API_CONFIGS = openaiConfig.OPENAI_API_CONFIGS;
++
++				GOOGLE_API_BASE_URLS = googleConfig.GOOGLE_API_BASE_URLS || [];
++				GOOGLE_API_KEYS = googleConfig.GOOGLE_API_KEYS || [];
++				GOOGLE_API_CONFIGS = googleConfig.GOOGLE_API_CONFIGS || {};
+ 			OLLAMA_API_CONFIGS = ollamaConfig.OLLAMA_API_CONFIGS;
+ 
+ 			if (ENABLE_OPENAI_API) {
+@@ -197,6 +288,7 @@
+ 	const submitHandler = async () => {
+ 		updateOpenAIHandler();
+ 		updateOllamaHandler();
++		updateGoogleHandler();
+ 
+ 		dispatch('save');
+ 
+@@ -215,6 +307,15 @@
+ 	onSubmit={addOllamaConnectionHandler}
+ />
+ 
++<AddConnectionModal
++	google
++	bind:show={showAddGoogleConnectionModal}
++	edit={editingGoogleIdx !== null}
++	connection={editingGoogleConnection}
++	onSubmit={handleGoogleSubmit}
++	onDelete={deleteGoogleConnectionHandler}
++/>
++
+ <form class="flex flex-col h-full justify-between text-sm" on:submit|preventDefault={submitHandler}>
+ 	<div class=" overflow-y-scroll scrollbar-hidden h-full">
+ 		{#if ENABLE_OPENAI_API !== null && ENABLE_OLLAMA_API !== null && connectionsConfig !== null}
+@@ -225,6 +326,11 @@
+ 
+ 				<div class="my-2">
+ 					<div class="mt-2 space-y-2">
++					<div class="my-2">
++
++
++						
++					</div>
+ 						<div class="flex justify-between items-center text-sm">
+ 							<div class="  font-medium">{$i18n.t('OpenAI API')}</div>
+ 
+@@ -359,6 +465,79 @@
+ 							</div>
+ 						</div>
+ 					{/if}
++
++					<div class=" my-2">
++
++							<div class="flex justify-between items-center text-sm mb-2">
++								<div class="  font-medium">{$i18n.t('Google API')}</div>
++
++								<div class="mt-1">
++									<Switch
++										bind:state={ENABLE_GOOGLE_API}
++										on:change={async () => {
++											updateGoogleHandler();
++										}}
++									/>
++								</div>
++							</div>
++						{#if ENABLE_GOOGLE_API}							<div class="flex flex-col gap-1.5 mt-1.5">
++								<div class="flex justify-between items-center">
++									<div class="font-medium text-xs">{$i18n.t('Manage Google API Connections')}</div>
++
++									<Tooltip content={$i18n.t(`Add Connection`)}>
++										<button
++											class="px-1"
++											on:click={() => {
++											showAddGoogleConnectionModal = true;
++											}}
++											type="button"
++										>
++											<Plus />
++										</button>
++									</Tooltip>
++								</div>
++
++								<div class="flex flex-col gap-1.5 mt-1.5">
++									{#each GOOGLE_API_BASE_URLS as url, idx}
++										<div class="flex items-center gap-2">
++											<input
++												class="text-sm bg-transparent w-full"
++												bind:value={GOOGLE_API_BASE_URLS[idx]}
++												placeholder={$i18n.t('API Base URL')}
++											/>
++											<SensitiveInput bind:value={GOOGLE_API_KEYS[idx]} placeholder={$i18n.t('API Key')} />
++										<Tooltip content={$i18n.t('Edit Connection')}>
++											<button
++											class="px-1"
++											on:click={() => {
++												editGoogleConnection(idx);
++											}}
++											type="button"
++											aria-label={$i18n.t('Edit')}
++											>
++												<PencilSolid />
++											</button>
++										</Tooltip>
++										<button
++											on:click={() => {
++											GOOGLE_API_BASE_URLS = GOOGLE_API_BASE_URLS.filter((_, urlIdx) => idx !== urlIdx);
++											GOOGLE_API_KEYS = GOOGLE_API_KEYS.filter((_, keyIdx) => idx !== keyIdx);
++											let newConfig = {};
++											GOOGLE_API_BASE_URLS.forEach((u, newIdx) => {
++												newConfig[newIdx] = GOOGLE_API_CONFIGS[newIdx < idx ? newIdx : newIdx + 1];
++											});
++											GOOGLE_API_CONFIGS = newConfig;
++											}}
++										type="button"
++											aria-label={$i18n.t('Delete')}
++										>
++											<Minus />
++											</button>
++										</div>
++									{/each}
++								</div>
++							</div>
++					{/if}
+ 				</div>
+ 
+ 				<div class="my-2">
+@@ -409,6 +588,7 @@
+ 					</div>
+ 				</div>
+ 			</div>
++			</div>
+ 		{:else}
+ 			<div class="flex h-full justify-center">
+ 				<div class="my-auto">
+diff --git a/src/lib/stores/index.ts b/src/lib/stores/index.ts
+index ac208cc..5beb4b3 100644
+--- a/src/lib/stores/index.ts
++++ b/src/lib/stores/index.ts
+@@ -1,5 +1,5 @@
+ import { APP_NAME } from '$lib/constants';
+-import { type Writable, writable } from 'svelte/store';
++import { type Writable, writable, get } from 'svelte/store';
+ import type { ModelConfig } from '$lib/apis';
+ import type { Banner } from '$lib/types';
+ import type { Socket } from 'socket.io-client';
+@@ -90,6 +90,13 @@ export const showOverview = writable(false);
+ export const showArtifacts = writable(false);
+ export const showCallOverlay = writable(false);
+ 
++// Auto-show chat controls for admin users on initial login
++user.subscribe((u) => {
++	if (u && u.role === 'admin' && !get(showControls)) {
++		showControls.set(true);
++	}
++});
++
+ export const artifactCode = writable(null);
+ export const artifactContents = writable(null);
+ 

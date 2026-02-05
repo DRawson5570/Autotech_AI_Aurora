@@ -1,0 +1,22 @@
+{
+  "scenario_id": "EDM_004",
+  "predictions": [
+    {
+      "hypothesis": "CAN bus communication failure (gateway fault)",
+      "prob": 0.75,
+      "reason": [
+        "high CAN drops 210",
+        "inverter status OK",
+        "no thermal/voltage issues"
+      ],
+      "tests": [
+        "check trend of CAN_drops_total over recent intervals"
+      ],
+      "mitigation": "restart gateway, inspect bus connections"
+    }
+  ],
+  "requested_measurements": [
+    "CAN_drops_total"
+  ],
+  "explanation": "The only abnormality is elevated CAN drops; all other metrics are nominal, pointing to a gateway or bus fault."
+}

@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Procedures Example - Autotech AI</title>
+    <meta name="description" content="Get step-by-step reset procedures, calibrations, relearns, and service procedures from Autotech AI." />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: { sans: ['Inter', 'sans-serif'] },
+            colors: {
+              slate: { 800: '#1e293b', 850: '#171717', 900: '#0a0a0a', 950: '#050505' },
+              brand: { blue: '#06b6d4', orange: '#14b8a6', accent: '#22d3ee', dark: '#083344' }
+            },
+          },
+        },
+      }
+    </script>
+    <style>
+      ::-webkit-scrollbar { width: 10px; }
+      ::-webkit-scrollbar-track { background: #0a0a0a; }
+      ::-webkit-scrollbar-thumb { background: #334155; border-radius: 5px; }
+    </style>
+  </head>
+  <body class="bg-slate-950 text-slate-200 font-sans antialiased">
+    
+    <!-- Header -->
+    <header class="fixed w-full top-0 z-50 bg-slate-950/90 backdrop-blur-md border-b border-slate-800/50">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+          <a href="/" class="flex items-center space-x-2">
+            <div class="bg-gradient-to-br from-cyan-500 to-cyan-400 p-2 rounded-lg">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              </svg>
+            </div>
+            <span class="text-xl font-bold text-white tracking-tight">Autotech <span class="text-cyan-400">AI</span></span>
+          </a>
+          <nav class="hidden md:flex space-x-8">
+            <a href="/" class="text-slate-300 hover:text-white transition-colors">Home</a>
+            <a href="/examples/" class="text-brand-blue font-medium">Examples</a>
+          </nav>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="pt-24 pb-16">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Breadcrumb -->
+        <nav class="mb-8 text-sm">
+          <a href="/examples/" class="text-slate-400 hover:text-white">Examples</a>
+          <span class="text-slate-600 mx-2">/</span>
+          <span class="text-brand-blue">Procedures</span>
+        </nav>
+
+        <!-- Page Header -->
+        <div class="mb-12">
+          <span class="inline-block px-3 py-1 text-xs font-medium text-green-400 bg-green-500/20 rounded-full mb-4">Beginner</span>
+          <h1 class="text-4xl font-extrabold text-white mb-4">Procedures</h1>
+          <p class="text-xl text-slate-400">Need a reset procedure, relearn, calibration, or step-by-step instructions? Just ask.</p>
+        </div>
+
+        <!-- Quick Examples Grid -->
+        <div class="mb-12">
+          <h2 class="text-2xl font-bold text-white mb-6">Procedure Examples</h2>
+          
+          <div class="grid gap-6">
+            
+            <!-- Example 1: Oil Life Reset -->
+            <div class="bg-slate-900/50 border border-slate-800 rounded-xl overflow-hidden">
+              <div class="bg-slate-800 px-4 py-3 border-b border-slate-700">
+                <span class="text-sm font-medium text-white">Oil Life Reset</span>
+              </div>
+              <div class="p-4 grid md:grid-cols-2 gap-4">
+                <div>
+                  <p class="text-slate-400 text-xs uppercase tracking-wider mb-2">You ask:</p>
+                  <p class="text-white font-mono text-sm bg-slate-800 rounded-lg p-3">
+                    How do I reset the oil life on a 2020 Chevy Silverado?
+                  </p>
+                </div>
+                <div>
+                  <p class="text-slate-400 text-xs uppercase tracking-wider mb-2">AI responds:</p>
+                  <div class="text-slate-300 text-sm bg-slate-800/50 rounded-lg p-3">
+                    <p class="mb-2"><strong class="text-white">2020 Silverado Oil Life Reset:</strong></p>
+                    <ol class="list-decimal list-inside space-y-1">
+                      <li>Turn ignition ON (engine off)</li>
+                      <li>Press accelerator pedal 3x within 5 seconds</li>
+                      <li>"Oil Life Reset" message appears</li>
+                      <li>Turn ignition off, then start engine to verify</li>
+                    </ol>
+                    <p class="text-xs text-slate-400 mt-2">Alternative: Settings → Vehicle → Oil Life → Reset via infotainment</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Example 2: TPMS Relearn -->
+            <div class="bg-slate-900/50 border border-slate-800 rounded-xl overflow-hidden">
+              <div class="bg-slate-800 px-4 py-3 border-b border-slate-700">
+                <span class="text-sm font-medium text-white">TPMS Relearn</span>
+              </div>
+              <div class="p-4 grid md:grid-cols-2 gap-4">
+                <div>
+                  <p class="text-slate-400 text-xs uppercase tracking-wider mb-2">You ask:</p>
+                  <p class="text-white font-mono text-sm bg-slate-800 rounded-lg p-3">
+                    TPMS relearn procedure for 2019 Ford F-150
+                  </p>
+                </div>
+                <div>
+                  <p class="text-slate-400 text-xs uppercase tracking-wider mb-2">AI responds:</p>
+                  <div class="text-slate-300 text-sm bg-slate-800/50 rounded-lg p-3">
+                    <p class="mb-2"><strong class="text-white">2019 F-150 TPMS Relearn:</strong></p>
+                    <ol class="list-decimal list-inside space-y-1">
+                      <li>Turn ignition ON, press brake 3x</li>
+                      <li>Horn chirps — system in learn mode</li>
+                      <li>Starting with LF tire, deflate until horn chirps</li>
+                      <li>Repeat RF → RR → LR</li>
+                      <li>Horn double-chirps when complete</li>
+                    </ol>
+                    <p class="text-xs text-slate-400 mt-2">Note: Requires TPMS tool for sensor ID programming on 2018+</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Example 3: Throttle Body Relearn -->
+            <div class="bg-slate-900/50 border border-slate-800 rounded-xl overflow-hidden">
+              <div class="bg-slate-800 px-4 py-3 border-b border-slate-700">
+                <span class="text-sm font-medium text-white">Throttle Body Relearn</span>
+              </div>
+              <div class="p-4 grid md:grid-cols-2 gap-4">
+                <div>
+                  <p class="text-slate-400 text-xs uppercase tracking-wider mb-2">You ask:</p>
+                  <p class="text-white font-mono text-sm bg-slate-800 rounded-lg p-3">
+                    How to do throttle body relearn on 2017 Nissan Altima?
+                  </p>
+                </div>
+                <div>
+                  <p class="text-slate-400 text-xs uppercase tracking-wider mb-2">AI responds:</p>
+                  <div class="text-slate-300 text-sm bg-slate-800/50 rounded-lg p-3">
+                    <p class="mb-2"><strong class="text-white">2017 Altima Idle Air Volume Learning:</strong></p>
+                    <ol class="list-decimal list-inside space-y-1">
+                      <li>Warm engine to operating temp, then turn OFF</li>
+                      <li>Wait 10 seconds with key out</li>
+                      <li>Turn key ON (don't start) for 3 seconds</li>
+                      <li>Quickly press gas pedal 5x within 5 seconds</li>
+                      <li>Wait 7 seconds, then press and hold gas pedal 10 sec</li>
+                      <li>Release when CEL blinks</li>
+                      <li>Start engine, let idle for 20 minutes</li>
+                    </ol>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Example 4: Power Window Reset -->
+            <div class="bg-slate-900/50 border border-slate-800 rounded-xl overflow-hidden">
+              <div class="bg-slate-800 px-4 py-3 border-b border-slate-700">
+                <span class="text-sm font-medium text-white">Window Auto-Up/Down Reset</span>
+              </div>
+              <div class="p-4 grid md:grid-cols-2 gap-4">
+                <div>
+                  <p class="text-slate-400 text-xs uppercase tracking-wider mb-2">You ask:</p>
+                  <p class="text-white font-mono text-sm bg-slate-800 rounded-lg p-3">
+                    Reset power window auto-up on 2018 Honda Accord
+                  </p>
+                </div>
+                <div>
+                  <p class="text-slate-400 text-xs uppercase tracking-wider mb-2">AI responds:</p>
+                  <div class="text-slate-300 text-sm bg-slate-800/50 rounded-lg p-3">
+                    <p class="mb-2"><strong class="text-white">2018 Accord Window Initialization:</strong></p>
+                    <ol class="list-decimal list-inside space-y-1">
+                      <li>Turn ignition to ON</li>
+                      <li>Lower window completely, release switch</li>
+                      <li>Pull UP and hold for 2 seconds after fully closed</li>
+                      <li>Release, then pull UP again and hold 2 seconds</li>
+                      <li>Test auto-up/down function</li>
+                    </ol>
+                    <p class="text-xs text-slate-400 mt-2">Repeat for each window that lost memory after battery disconnect</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Example 5: Steering Angle Reset -->
+            <div class="bg-slate-900/50 border border-slate-800 rounded-xl overflow-hidden">
+              <div class="bg-slate-800 px-4 py-3 border-b border-slate-700">
+                <span class="text-sm font-medium text-white">Steering Angle Sensor Reset</span>
+              </div>
+              <div class="p-4 grid md:grid-cols-2 gap-4">
+                <div>
+                  <p class="text-slate-400 text-xs uppercase tracking-wider mb-2">You ask:</p>
+                  <p class="text-white font-mono text-sm bg-slate-800 rounded-lg p-3">
+                    Steering angle sensor calibration 2016 Toyota Camry
+                  </p>
+                </div>
+                <div>
+                  <p class="text-slate-400 text-xs uppercase tracking-wider mb-2">AI responds:</p>
+                  <div class="text-slate-300 text-sm bg-slate-800/50 rounded-lg p-3">
+                    <p class="mb-2"><strong class="text-white">2016 Camry Steering Angle Calibration:</strong></p>
+                    <ol class="list-decimal list-inside space-y-1">
+                      <li>Start engine, let idle</li>
+                      <li>Turn wheel full lock left, hold 2 sec</li>
+                      <li>Turn wheel full lock right, hold 2 sec</li>
+                      <li>Return wheel to center</li>
+                      <li>Drive straight at 15+ mph for 30 seconds</li>
+                    </ol>
+                    <p class="text-xs text-slate-400 mt-2">VSC light should turn off. If not, use scan tool to reset via ABS module.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Example 6: Battery Reset/BMS -->
+            <div class="bg-slate-900/50 border border-slate-800 rounded-xl overflow-hidden">
+              <div class="bg-slate-800 px-4 py-3 border-b border-slate-700">
+                <span class="text-sm font-medium text-white">Battery Management Reset</span>
+              </div>
+              <div class="p-4 grid md:grid-cols-2 gap-4">
+                <div>
+                  <p class="text-slate-400 text-xs uppercase tracking-wider mb-2">You ask:</p>
+                  <p class="text-white font-mono text-sm bg-slate-800 rounded-lg p-3">
+                    Battery registration procedure for 2019 BMW 330i
+                  </p>
+                </div>
+                <div>
+                  <p class="text-slate-400 text-xs uppercase tracking-wider mb-2">AI responds:</p>
+                  <div class="text-slate-300 text-sm bg-slate-800/50 rounded-lg p-3">
+                    <p class="mb-2"><strong class="text-white">2019 BMW G20 Battery Registration:</strong></p>
+                    <p class="mb-2 text-orange-300">⚠️ Requires scan tool (ISTA, Carly, or Autologic)</p>
+                    <ol class="list-decimal list-inside space-y-1">
+                      <li>Connect scan tool to OBD port</li>
+                      <li>Navigate to Power Management → Battery</li>
+                      <li>Select "Register New Battery"</li>
+                      <li>Enter battery specs (Ah rating, type)</li>
+                      <li>Confirm registration</li>
+                    </ol>
+                    <p class="text-xs text-slate-400 mt-2">Skipping this causes overcharging and premature battery failure</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Example 7: Brake Bleed Sequence -->
+            <div class="bg-slate-900/50 border border-slate-800 rounded-xl overflow-hidden">
+              <div class="bg-slate-800 px-4 py-3 border-b border-slate-700">
+                <span class="text-sm font-medium text-white">ABS Brake Bleed</span>
+              </div>
+              <div class="p-4 grid md:grid-cols-2 gap-4">
+                <div>
+                  <p class="text-slate-400 text-xs uppercase tracking-wider mb-2">You ask:</p>
+                  <p class="text-white font-mono text-sm bg-slate-800 rounded-lg p-3">
+                    Brake bleed procedure with ABS on 2015 Jeep Grand Cherokee
+                  </p>
+                </div>
+                <div>
+                  <p class="text-slate-400 text-xs uppercase tracking-wider mb-2">AI responds:</p>
+                  <div class="text-slate-300 text-sm bg-slate-800/50 rounded-lg p-3">
+                    <p class="mb-2"><strong class="text-white">2015 Grand Cherokee ABS Bleed:</strong></p>
+                    <p class="mb-2 text-orange-300">⚠️ Scan tool required for ABS pump activation</p>
+                    <p class="mb-1"><strong>Manual bleed sequence:</strong></p>
+                    <p class="mb-2">RR → LR → RF → LF (furthest from master first)</p>
+                    <p class="mb-1"><strong>Then ABS bleed via scan tool:</strong></p>
+                    <ol class="list-decimal list-inside space-y-1">
+                      <li>Connect scan tool, go to ABS module</li>
+                      <li>Run "Automated Bleed" function</li>
+                      <li>Open bleeder when prompted</li>
+                      <li>Repeat until fluid runs clear</li>
+                    </ol>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Example 8: Key Fob Programming -->
+            <div class="bg-slate-900/50 border border-slate-800 rounded-xl overflow-hidden">
+              <div class="bg-slate-800 px-4 py-3 border-b border-slate-700">
+                <span class="text-sm font-medium text-white">Key Fob Programming</span>
+              </div>
+              <div class="p-4 grid md:grid-cols-2 gap-4">
+                <div>
+                  <p class="text-slate-400 text-xs uppercase tracking-wider mb-2">You ask:</p>
+                  <p class="text-white font-mono text-sm bg-slate-800 rounded-lg p-3">
+                    Program new key fob to 2014 Dodge Charger
+                  </p>
+                </div>
+                <div>
+                  <p class="text-slate-400 text-xs uppercase tracking-wider mb-2">AI responds:</p>
+                  <div class="text-slate-300 text-sm bg-slate-800/50 rounded-lg p-3">
+                    <p class="mb-2"><strong class="text-white">2014 Charger Key Fob Programming:</strong></p>
+                    <p class="mb-2 text-yellow-300">Requires 2 working fobs to self-program</p>
+                    <ol class="list-decimal list-inside space-y-1">
+                      <li>Enter vehicle with fob #1, close all doors</li>
+                      <li>Press START without brake (accessory mode)</li>
+                      <li>Within 10 sec, hold UNLOCK + PANIC for 2 sec</li>
+                      <li>Release, then press any button on new fob</li>
+                      <li>Chime confirms programming</li>
+                      <li>Press START to exit</li>
+                    </ol>
+                    <p class="text-xs text-slate-400 mt-2">If only one fob exists, dealer/locksmith with WITECH required</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- What You Can Ask -->
+        <div class="mb-10">
+          <h2 class="text-2xl font-bold text-white mb-4">Procedures You Can Ask About</h2>
+          
+          <div class="grid md:grid-cols-2 gap-4">
+            <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-4">
+              <h4 class="font-bold text-white mb-2">🔄 Resets & Relearns</h4>
+              <ul class="text-slate-400 text-sm space-y-1">
+                <li>• Oil life monitor reset</li>
+                <li>• TPMS sensor relearn</li>
+                <li>• Throttle body relearn</li>
+                <li>• Idle relearn procedures</li>
+                <li>• Transmission adaptive relearn</li>
+                <li>• Window/sunroof initialization</li>
+              </ul>
+            </div>
+            <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-4">
+              <h4 class="font-bold text-white mb-2">🎯 Calibrations</h4>
+              <ul class="text-slate-400 text-sm space-y-1">
+                <li>• Steering angle sensor</li>
+                <li>• Yaw rate sensor</li>
+                <li>• ADAS camera calibration</li>
+                <li>• Radar sensor alignment</li>
+                <li>• Ride height calibration</li>
+                <li>• Fuel gauge calibration</li>
+              </ul>
+            </div>
+            <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-4">
+              <h4 class="font-bold text-white mb-2">🔧 Service Procedures</h4>
+              <ul class="text-slate-400 text-sm space-y-1">
+                <li>• Brake bleed sequence</li>
+                <li>• Coolant bleed procedure</li>
+                <li>• Timing belt/chain alignment</li>
+                <li>• Valve adjustment</li>
+                <li>• Injector coding</li>
+                <li>• DPF regeneration</li>
+              </ul>
+            </div>
+            <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-4">
+              <h4 class="font-bold text-white mb-2">🔑 Programming</h4>
+              <ul class="text-slate-400 text-sm space-y-1">
+                <li>• Key fob programming</li>
+                <li>• Immobilizer relearn</li>
+                <li>• Battery registration (BMS)</li>
+                <li>• Module replacement setup</li>
+                <li>• Accessory configuration</li>
+                <li>• Feature activation</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tips -->
+        <div class="mb-10 bg-blue-500/10 border border-blue-500/30 rounded-xl p-5">
+          <h3 class="font-bold text-white mb-3">💡 Tips for Best Results</h3>
+          <ul class="text-slate-300 space-y-2">
+            <li>✓ Always include <strong class="text-white">year, make, model, and engine</strong></li>
+            <li>✓ Mention what you're trying to accomplish: "after battery replacement" or "after alignment"</li>
+            <li>✓ Ask about <strong class="text-white">tool requirements</strong> — some procedures need a scan tool</li>
+            <li>✓ Ask follow-up questions: "what if it doesn't work?" "any precautions?"</li>
+          </ul>
+        </div>
+
+        <!-- Try It Box -->
+        <div class="bg-gradient-to-r from-brand-blue/20 to-brand-accent/20 border border-brand-blue/30 rounded-2xl p-8 text-center">
+          <h2 class="text-2xl font-bold text-white mb-4">Try It Yourself</h2>
+          <p class="text-slate-300 mb-6">Need a procedure? Just ask with the year/make/model.</p>
+          <a href="/auth" class="inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-full text-white bg-brand-blue hover:bg-cyan-600 transition-all">
+            Start Asking
+          </a>
+        </div>
+
+        <!-- Navigation -->
+        <div class="mt-12 flex justify-between">
+          <a href="diagnostic-report.html" class="text-slate-400 hover:text-white transition-colors flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+            Diagnostic Report
+          </a>
+          <a href="intermittent-problem.html" class="text-brand-blue hover:text-brand-accent transition-colors flex items-center">
+            Next: Intermittent Problems
+            <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </a>
+        </div>
+
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800 py-8">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-slate-500 text-sm">
+        <p>&copy; 2026 Autotech AI. All rights reserved.</p>
+      </div>
+    </footer>
+
+  </body>
+</html>

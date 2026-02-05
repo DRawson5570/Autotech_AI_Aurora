@@ -1,0 +1,1242 @@
+{
+  "report": {
+    "total": 10,
+    "top1_correct": 8,
+    "top3_correct": 8,
+    "scenarios": [
+      {
+        "scenario_id": "EDM_001",
+        "title": "Synthetic: cooling_pump_failure",
+        "ground_truth": [
+          "Cooling pump failure"
+        ],
+        "top_predictions": [
+          {
+            "hypothesis": "Cooling pump failure",
+            "prob": 0.65,
+            "reason": [
+              "high coolant temp (8029\u202fK)",
+              "inverter THERMAL_DERATE",
+              "elevated Ia_max (681\u202fA)"
+            ]
+          }
+        ],
+        "top1_correct": true,
+        "top3_correct": true,
+        "trace_steps": [
+          {
+            "model_resp": {
+              "scenario_id": "EDM_001",
+              "predictions": [
+                {
+                  "hypothesis": "Cooling pump failure",
+                  "prob": 0.85,
+                  "reason": [
+                    "coolant temp high and rising",
+                    "inverter THERMAL_DERATE",
+                    "Ia_max elevated"
+                  ],
+                  "tests": [
+                    "measure pump_motor_current_last_60s_mean",
+                    "measure coolant inlet/outlet temps",
+                    "measure pump_motor_temp"
+                  ],
+                  "mitigation": "limit torque, stop high\u2011load operation, schedule pump replacement"
+                }
+              ],
+              "requested_measurements": [
+                "pump_motor_current_last_60s_mean",
+                "pump_motor_current_history",
+                "coolant_temp_inlet_history",
+                "coolant_temp_outlet_history"
+              ],
+              "explanation": "High coolant temperature combined with inverter derate and high current strongly indicate a failed cooling pump; further current and temperature checks will confirm."
+            },
+            "measurements": {
+              "pump_motor_current_last_60s_mean": "NOT_AVAILABLE",
+              "pump_motor_current_history": "NOT_AVAILABLE",
+              "coolant_temp_inlet_history": "NOT_AVAILABLE",
+              "coolant_temp_outlet_history": "NOT_AVAILABLE"
+            }
+          },
+          {
+            "model_resp": {
+              "scenario_id": "EDM_001",
+              "predictions": [
+                {
+                  "hypothesis": "Cooling pump failure",
+                  "prob": 0.8,
+                  "reason": [
+                    "high coolant temp",
+                    "inverter THERMAL_DERATE",
+                    "elevated Ia_max"
+                  ],
+                  "tests": [
+                    "measure pump_motor_current_last_60s_mean",
+                    "measure pump_motor_current_history",
+                    "measure coolant_temp_inlet_history",
+                    "measure coolant_temp_outlet_history",
+                    "measure pump_motor_temp"
+                  ],
+                  "mitigation": "limit torque, schedule pump replacement"
+                }
+              ],
+              "requested_measurements": [
+                "pump_motor_current_last_60s_mean",
+                "pump_motor_current_history",
+                "coolant_temp_inlet_history",
+                "coolant_temp_outlet_history",
+                "pump_motor_temp"
+              ],
+              "explanation": "High coolant temperature and inverter derate with elevated current strongly suggest pump failure; current and temperature data will confirm."
+            },
+            "measurements": {
+              "pump_motor_current_last_60s_mean": "NOT_AVAILABLE",
+              "pump_motor_current_history": "NOT_AVAILABLE",
+              "coolant_temp_inlet_history": "NOT_AVAILABLE",
+              "coolant_temp_outlet_history": "NOT_AVAILABLE",
+              "pump_motor_temp": "NOT_AVAILABLE"
+            }
+          },
+          {
+            "model_resp": {
+              "scenario_id": "EDM_001",
+              "predictions": [
+                {
+                  "hypothesis": "Cooling pump failure",
+                  "prob": 0.65,
+                  "reason": [
+                    "high coolant temp (8029\u202fK)",
+                    "inverter THERMAL_DERATE",
+                    "elevated Ia_max (681\u202fA)"
+                  ],
+                  "tests": [
+                    "measure pump_motor_current_last_60s_mean",
+                    "measure pump_motor_current_history",
+                    "measure coolant_temp_inlet_history",
+                    "measure coolant_temp_outlet_history",
+                    "measure pump_motor_temp"
+                  ],
+                  "mitigation": "limit torque, schedule pump inspection"
+                }
+              ],
+              "requested_measurements": [
+                "pump_motor_current_last_60s_mean",
+                "pump_motor_current_history",
+                "coolant_temp_inlet_history",
+                "coolant_temp_outlet_history",
+                "pump_motor_temp"
+              ],
+              "explanation": "Existing data shows high temp, derate and current spikes; pump\u2011related diagnostics are needed to confirm failure."
+            },
+            "measurements": {
+              "pump_motor_current_last_60s_mean": "NOT_AVAILABLE",
+              "pump_motor_current_history": "NOT_AVAILABLE",
+              "coolant_temp_inlet_history": "NOT_AVAILABLE",
+              "coolant_temp_outlet_history": "NOT_AVAILABLE",
+              "pump_motor_temp": "NOT_AVAILABLE"
+            }
+          }
+        ],
+        "debug_raw_exists": false,
+        "model_output_path": "synthetic_edm/model_outputs/model_output_EDM_001.json",
+        "trace_path": "synthetic_edm/model_outputs/model_trace_EDM_001.json"
+      },
+      {
+        "scenario_id": "EDM_002",
+        "title": "Synthetic: phase_fet_short",
+        "ground_truth": [
+          "Phase FET short (phase A)"
+        ],
+        "top_predictions": [
+          {
+            "hypothesis": "Phase FET short (phase A)",
+            "prob": 0.6,
+            "reason": [
+              "OVERCURRENT_FAULT in inverter_status_unique",
+              "Ia_max far above median",
+              "Vdc_min low relative to Vdc_max"
+            ]
+          }
+        ],
+        "top1_correct": true,
+        "top3_correct": true,
+        "trace_steps": [
+          {
+            "model_resp": {
+              "scenario_id": "EDM_002",
+              "predictions": [
+                {
+                  "hypothesis": "Phase FET short (phase A)",
+                  "prob": 0.85,
+                  "reason": [
+                    "OVERCURRENT_FAULT in inverter_status",
+                    "Ia_max far above median",
+                    "Vdc_min low relative to Vdc_max"
+                  ],
+                  "tests": [
+                    "measure Ia_max_last_60s_mean",
+                    "measure Ia_history",
+                    "measure Vdc_history"
+                  ],
+                  "mitigation": "Limit inverter current and schedule immediate replacement of the affected FET"
+                }
+              ],
+              "requested_measurements": [
+                "Ia_max_last_60s_mean",
+                "Ia_history",
+                "Vdc_history"
+              ],
+              "explanation": "High instantaneous current and an overcurrent fault strongly point to a shorted FET on phase A; confirming current history and DC bus trends will validate this hypothesis."
+            },
+            "measurements": {
+              "Ia_max_last_60s_mean": "NOT_AVAILABLE",
+              "Ia_history": "NOT_AVAILABLE",
+              "Vdc_history": "NOT_AVAILABLE"
+            }
+          },
+          {
+            "model_resp": {
+              "scenario_id": "EDM_002",
+              "predictions": [
+                {
+                  "hypothesis": "Phase FET short (phase A)",
+                  "prob": 0.8,
+                  "reason": [
+                    "OVERCURRENT_FAULT in inverter_status",
+                    "Ia_max far above median",
+                    "Vdc_min low relative to Vdc_max"
+                  ],
+                  "tests": [
+                    "measure Ia_max_last_60s_mean",
+                    "measure Ia_history",
+                    "measure Vdc_history"
+                  ],
+                  "mitigation": "Limit inverter current and schedule immediate replacement of the affected FET"
+                }
+              ],
+              "requested_measurements": [
+                "Ia_max_last_60s_mean",
+                "Ia_history",
+                "Vdc_history"
+              ],
+              "explanation": "Overcurrent fault and high peak current in CSV point to a shorted FET; current and DC bus time\u2011series will confirm the diagnosis."
+            },
+            "measurements": {
+              "Ia_max_last_60s_mean": "NOT_AVAILABLE",
+              "Ia_history": "NOT_AVAILABLE",
+              "Vdc_history": "NOT_AVAILABLE"
+            }
+          },
+          {
+            "model_resp": {
+              "scenario_id": "EDM_002",
+              "predictions": [
+                {
+                  "hypothesis": "Phase FET short (phase A)",
+                  "prob": 0.6,
+                  "reason": [
+                    "OVERCURRENT_FAULT in inverter_status_unique",
+                    "Ia_max far above median",
+                    "Vdc_min low relative to Vdc_max"
+                  ],
+                  "tests": [
+                    "measure Ia_max_last_60s_mean",
+                    "measure Ia_history",
+                    "measure Vdc_history",
+                    "measure inverter_status_history"
+                  ],
+                  "mitigation": "Limit inverter current and schedule immediate replacement of the affected FET"
+                }
+              ],
+              "requested_measurements": [
+                "Ia_max_last_60s_mean",
+                "Ia_history",
+                "Vdc_history",
+                "inverter_status_history"
+              ],
+              "explanation": "No current or DC bus time\u2011series were returned, so confidence is lowered; additional inverter status history is requested to confirm a phase\u2011short signature."
+            },
+            "measurements": {
+              "Ia_max_last_60s_mean": "NOT_AVAILABLE",
+              "Ia_history": "NOT_AVAILABLE",
+              "Vdc_history": "NOT_AVAILABLE",
+              "inverter_status_history": "NOT_AVAILABLE"
+            }
+          }
+        ],
+        "debug_raw_exists": false,
+        "model_output_path": "synthetic_edm/model_outputs/model_output_EDM_002.json",
+        "trace_path": "synthetic_edm/model_outputs/model_trace_EDM_002.json"
+      },
+      {
+        "scenario_id": "EDM_003",
+        "title": "Synthetic: bms_cell_imbalance",
+        "ground_truth": [
+          "BMS cell imbalance / high internal resistance cell"
+        ],
+        "top_predictions": [
+          {
+            "hypothesis": "BMS cell imbalance / high internal resistance cell",
+            "prob": 0.6,
+            "reason": [
+              "high Ia_max (681\u202fA)",
+              "low Vdc_min (318\u202fV)",
+              "cell voltage data missing"
+            ]
+          }
+        ],
+        "top1_correct": true,
+        "top3_correct": true,
+        "trace_steps": [
+          {
+            "model_resp": {
+              "scenario_id": "EDM_003",
+              "predictions": [
+                {
+                  "hypothesis": "BMS cell imbalance / high internal resistance cell",
+                  "prob": 0.8,
+                  "reason": [
+                    "high Ia_max (681\u202fA)",
+                    "low Vdc_min (318\u202fV)",
+                    "coolant temps normal"
+                  ],
+                  "tests": [
+                    "measure cell_voltage_1_history",
+                    "measure cell_voltage_2_history",
+                    "measure cell_voltage_3_history",
+                    "measure cell_voltage_1_last_60s_mean",
+                    "measure cell_voltage_2_last_60s_mean",
+                    "measure cell_voltage_3_last_60s_mean"
+                  ],
+                  "mitigation": "replace or repair high\u2011resistance cell and run BMS cell\u2011balancing routine"
+                }
+              ],
+              "requested_measurements": [
+                "cell_voltage_1_history",
+                "cell_voltage_2_history",
+                "cell_voltage_3_history",
+                "cell_voltage_1_last_60s_mean",
+                "cell_voltage_2_last_60s_mean",
+                "cell_voltage_3_last_60s_mean"
+              ],
+              "explanation": "The high current draw combined with a low DC bus voltage points to a cell imbalance or high internal resistance in the battery pack; further voltage history will confirm the imbalance."
+            },
+            "measurements": {
+              "cell_voltage_1_history": "NOT_AVAILABLE",
+              "cell_voltage_2_history": "NOT_AVAILABLE",
+              "cell_voltage_3_history": "NOT_AVAILABLE",
+              "cell_voltage_1_last_60s_mean": "NOT_AVAILABLE",
+              "cell_voltage_2_last_60s_mean": "NOT_AVAILABLE",
+              "cell_voltage_3_last_60s_mean": "NOT_AVAILABLE"
+            }
+          },
+          {
+            "model_resp": {
+              "scenario_id": "EDM_003",
+              "predictions": [
+                {
+                  "hypothesis": "BMS cell imbalance / high internal resistance cell",
+                  "prob": 0.6,
+                  "reason": [
+                    "high Ia_max (681\u202fA)",
+                    "low Vdc_min (318\u202fV)",
+                    "cell voltage data missing"
+                  ],
+                  "tests": [
+                    "measure cell voltage history (if available)",
+                    "check BMS logs for imbalance"
+                  ],
+                  "mitigation": "run BMS balancing routine or replace suspected cell"
+                }
+              ],
+              "requested_measurements": [],
+              "explanation": "High current draw and low DC bus voltage suggest battery imbalance; missing cell voltage history reduces confidence."
+            },
+            "measurements": {}
+          }
+        ],
+        "debug_raw_exists": false,
+        "model_output_path": "synthetic_edm/model_outputs/model_output_EDM_003.json",
+        "trace_path": "synthetic_edm/model_outputs/model_trace_EDM_003.json"
+      },
+      {
+        "scenario_id": "EDM_004",
+        "title": "Synthetic: can_message_loss",
+        "ground_truth": [
+          "CAN message loss / gateway fault"
+        ],
+        "top_predictions": [
+          {
+            "hypothesis": "CAN gateway fault causing message loss",
+            "prob": 0.9,
+            "reason": [
+              "210 CAN drops recorded",
+              "inverter status OK",
+              "no voltage/temperature anomalies"
+            ]
+          }
+        ],
+        "top1_correct": false,
+        "top3_correct": false,
+        "trace_steps": [
+          {
+            "model_resp": {
+              "scenario_id": "EDM_004",
+              "predictions": [
+                {
+                  "hypothesis": "CAN gateway fault causing message loss",
+                  "prob": 0.85,
+                  "reason": [
+                    "210 CAN drops",
+                    "inverter OK",
+                    "no voltage or temperature anomalies"
+                  ],
+                  "tests": [
+                    "capture CAN bus logs for drop patterns",
+                    "check gateway fault diagnostics"
+                  ],
+                  "mitigation": "replace or repair the CAN gateway component"
+                }
+              ],
+              "requested_measurements": [
+                "gateway_fault_code",
+                "CAN_bus_error_count_last_60s"
+              ],
+              "explanation": "High CAN drops with otherwise healthy system indicate a gateway fault; recommended tests and mitigation target gateway."
+            },
+            "measurements": {
+              "gateway_fault_code": "NOT_AVAILABLE",
+              "CAN_bus_error_count_last_60s": "NOT_AVAILABLE"
+            }
+          },
+          {
+            "model_resp": {
+              "scenario_id": "EDM_004",
+              "predictions": [
+                {
+                  "hypothesis": "CAN gateway fault causing message loss",
+                  "prob": 0.8,
+                  "reason": [
+                    "210 CAN drops",
+                    "inverter OK",
+                    "no voltage/temperature anomalies"
+                  ],
+                  "tests": [
+                    "capture CAN bus logs for drop patterns",
+                    "examine gateway diagnostic registers"
+                  ],
+                  "mitigation": "replace or repair CAN gateway component"
+                }
+              ],
+              "requested_measurements": [
+                "CAN_error_rate_last_60s",
+                "gateway_health_status"
+              ],
+              "explanation": "CAN drops alone suggest a gateway issue; missing fault codes prompt direct bus error rate and gateway health checks."
+            },
+            "measurements": {
+              "CAN_error_rate_last_60s": "NOT_AVAILABLE",
+              "gateway_health_status": "NOT_AVAILABLE"
+            }
+          },
+          {
+            "model_resp": {
+              "scenario_id": "EDM_004",
+              "predictions": [
+                {
+                  "hypothesis": "CAN gateway fault causing message loss",
+                  "prob": 0.9,
+                  "reason": [
+                    "210 CAN drops recorded",
+                    "inverter status OK",
+                    "no voltage/temperature anomalies"
+                  ],
+                  "tests": [
+                    "capture detailed CAN bus logs to confirm drop patterns",
+                    "examine gateway diagnostic registers for fault codes"
+                  ],
+                  "mitigation": "replace or repair the affected CAN gateway component"
+                }
+              ],
+              "requested_measurements": [
+                "CAN_drops_total",
+                "inverter_status_unique"
+              ],
+              "explanation": "High CAN drop count with otherwise normal parameters points to a gateway fault; confirming current drop statistics and inverter health will reinforce the hypothesis."
+            },
+            "measurements": {
+              "CAN_drops_total": 210,
+              "inverter_status_unique": [
+                "OK"
+              ]
+            }
+          }
+        ],
+        "debug_raw_exists": false,
+        "model_output_path": "synthetic_edm/model_outputs/model_output_EDM_004.json",
+        "trace_path": "synthetic_edm/model_outputs/model_trace_EDM_004.json"
+      },
+      {
+        "scenario_id": "EDM_005",
+        "title": "Synthetic: cooling_pump_failure",
+        "ground_truth": [
+          "Cooling pump failure"
+        ],
+        "top_predictions": [
+          {
+            "hypothesis": "Cooling pump failure",
+            "prob": 0.85,
+            "reason": [
+              "high coolant_temp_max (~8k)",
+              "inverter THERMAL_DERATE",
+              "Ia_max elevated"
+            ]
+          }
+        ],
+        "top1_correct": true,
+        "top3_correct": true,
+        "trace_steps": [
+          {
+            "model_resp": {
+              "scenario_id": "EDM_005",
+              "predictions": [
+                {
+                  "hypothesis": "Cooling pump failure",
+                  "prob": 0.78,
+                  "reason": [
+                    "inverter THERMAL_DERATE",
+                    "high coolant_temp_max"
+                  ],
+                  "tests": [
+                    "measure pump_motor_current_last_60s_mean",
+                    "measure pump_motor_current_history",
+                    "measure coolant_inlet_temp_history"
+                  ],
+                  "mitigation": "Reduce torque, schedule pump replacement"
+                }
+              ],
+              "requested_measurements": [
+                "pump_motor_current_last_60s_mean",
+                "pump_motor_current_history",
+                "coolant_inlet_temp_history"
+              ],
+              "explanation": "Thermal derate plus high coolant temperature points to pump failure; current and inlet temperature checks confirm."
+            },
+            "measurements": {
+              "pump_motor_current_last_60s_mean": "NOT_AVAILABLE",
+              "pump_motor_current_history": "NOT_AVAILABLE",
+              "coolant_inlet_temp_history": "NOT_AVAILABLE"
+            }
+          },
+          {
+            "model_resp": {
+              "scenario_id": "EDM_005",
+              "predictions": [
+                {
+                  "hypothesis": "Cooling pump failure",
+                  "prob": 0.8,
+                  "reason": [
+                    "inverter THERMAL_DERATE",
+                    "high coolant_temp_max",
+                    "pump current missing"
+                  ],
+                  "tests": [
+                    "measure coolant_temp_last_60s_mean",
+                    "measure pump_motor_current_last_60s_mean"
+                  ],
+                  "mitigation": "Reduce torque and schedule pump replacement"
+                }
+              ],
+              "requested_measurements": [
+                "coolant_temp_last_60s_mean",
+                "pump_motor_current_last_60s_mean"
+              ],
+              "explanation": "Coolant temp is extremely high and inverter is derating; confirming pump current will validate pump failure."
+            },
+            "measurements": {
+              "coolant_temp_last_60s_mean": "NOT_AVAILABLE",
+              "pump_motor_current_last_60s_mean": "NOT_AVAILABLE"
+            }
+          },
+          {
+            "model_resp": {
+              "scenario_id": "EDM_005",
+              "predictions": [
+                {
+                  "hypothesis": "Cooling pump failure",
+                  "prob": 0.85,
+                  "reason": [
+                    "high coolant_temp_max (~8k)",
+                    "inverter THERMAL_DERATE",
+                    "Ia_max elevated"
+                  ],
+                  "tests": [
+                    "measure pump_motor_current_last_60s_mean",
+                    "measure pump_motor_current_history",
+                    "measure coolant_temp_last_60s_mean"
+                  ],
+                  "mitigation": "reduce torque, schedule pump replacement"
+                }
+              ],
+              "requested_measurements": [
+                "pump_motor_current_last_60s_mean",
+                "pump_motor_current_history",
+                "coolant_temp_last_60s_mean"
+              ],
+              "explanation": "Coolant temp extreme and inverter derating indicate overheating; confirming pump current will validate pump failure."
+            },
+            "measurements": {
+              "pump_motor_current_last_60s_mean": "NOT_AVAILABLE",
+              "pump_motor_current_history": "NOT_AVAILABLE",
+              "coolant_temp_last_60s_mean": "NOT_AVAILABLE"
+            }
+          }
+        ],
+        "debug_raw_exists": false,
+        "model_output_path": "synthetic_edm/model_outputs/model_output_EDM_005.json",
+        "trace_path": "synthetic_edm/model_outputs/model_trace_EDM_005.json"
+      },
+      {
+        "scenario_id": "EDM_006",
+        "title": "Synthetic: phase_fet_short",
+        "ground_truth": [
+          "Phase FET short (phase A)"
+        ],
+        "top_predictions": [
+          {
+            "hypothesis": "Phase FET short (phase A)",
+            "prob": 0.75,
+            "reason": [
+              "Ia_max 6667A & inverter overcurrent fault",
+              "Vdc_min near lower limit",
+              "missing current waveform reduces certainty"
+            ]
+          }
+        ],
+        "top1_correct": true,
+        "top3_correct": true,
+        "trace_steps": [
+          {
+            "model_resp": {
+              "scenario_id": "EDM_006",
+              "predictions": [
+                {
+                  "hypothesis": "Phase FET short (phase A)",
+                  "prob": 0.9,
+                  "reason": [
+                    "Ia_max 6667A far above normal",
+                    "inverter reports OVERCURRENT_FAULT",
+                    "Vdc_min near lower limit"
+                  ],
+                  "tests": [
+                    "measure phase A current waveform",
+                    "measure FET gate drive voltage",
+                    "measure phase A FET temperature"
+                  ],
+                  "mitigation": "Isolate phase A, reduce load, schedule repair"
+                }
+              ],
+              "requested_measurements": [
+                "phase_A_current_history"
+              ],
+              "explanation": "High overcurrent and fault status point to a phase\u2011A FET short; current waveform and FET temperature confirm the defect."
+            },
+            "measurements": {
+              "phase_A_current_history": "NOT_AVAILABLE"
+            }
+          },
+          {
+            "model_resp": {
+              "scenario_id": "EDM_006",
+              "predictions": [
+                {
+                  "hypothesis": "Phase FET short (phase A)",
+                  "prob": 0.85,
+                  "reason": [
+                    "Ia_max 6667A, inverter reports OVERCURRENT_FAULT",
+                    "Vdc_min near lower limit",
+                    "missing current waveform reduces certainty"
+                  ],
+                  "tests": [
+                    "measure phase A current waveform",
+                    "measure phase A FET gate drive voltage",
+                    "measure phase A FET temperature"
+                  ],
+                  "mitigation": "Isolate phase A, reduce load, schedule repair"
+                }
+              ],
+              "requested_measurements": [
+                "phase_A_fet_temperature",
+                "phase_A_gate_drive_voltage",
+                "phase_A_current_waveform",
+                "phase_B_current_history",
+                "phase_C_current_history"
+              ],
+              "explanation": "Previous current history unavailable; new measurements will confirm the short on phase A and rule out other phases."
+            },
+            "measurements": {
+              "phase_A_fet_temperature": "NOT_AVAILABLE",
+              "phase_A_gate_drive_voltage": "NOT_AVAILABLE",
+              "phase_A_current_waveform": "NOT_AVAILABLE",
+              "phase_B_current_history": "NOT_AVAILABLE",
+              "phase_C_current_history": "NOT_AVAILABLE"
+            }
+          },
+          {
+            "model_resp": {
+              "scenario_id": "EDM_006",
+              "predictions": [
+                {
+                  "hypothesis": "Phase FET short (phase A)",
+                  "prob": 0.75,
+                  "reason": [
+                    "Ia_max 6667A & inverter overcurrent fault",
+                    "Vdc_min near lower limit",
+                    "missing current waveform reduces certainty"
+                  ],
+                  "tests": [
+                    "measure phase_A_current_waveform",
+                    "measure phase_A_fet_temperature",
+                    "measure phase_A_gate_drive_voltage",
+                    "measure phase_A_fet_current",
+                    "measure phase_B_current_history",
+                    "measure phase_C_current_history"
+                  ],
+                  "mitigation": "Limit torque, isolate phase A, schedule repair"
+                }
+              ],
+              "requested_measurements": [
+                "phase_A_current_waveform",
+                "phase_A_fet_temperature",
+                "phase_A_gate_drive_voltage",
+                "phase_A_fet_current",
+                "phase_B_current_history",
+                "phase_C_current_history"
+              ],
+              "explanation": "Previous measurements unavailable; requesting phase\u2011specific current, temperature, and gate drive data to confirm the short and rule out other phases."
+            },
+            "measurements": {
+              "phase_A_current_waveform": "NOT_AVAILABLE",
+              "phase_A_fet_temperature": "NOT_AVAILABLE",
+              "phase_A_gate_drive_voltage": "NOT_AVAILABLE",
+              "phase_A_fet_current": "NOT_AVAILABLE",
+              "phase_B_current_history": "NOT_AVAILABLE",
+              "phase_C_current_history": "NOT_AVAILABLE"
+            }
+          }
+        ],
+        "debug_raw_exists": false,
+        "model_output_path": "synthetic_edm/model_outputs/model_output_EDM_006.json",
+        "trace_path": "synthetic_edm/model_outputs/model_trace_EDM_006.json"
+      },
+      {
+        "scenario_id": "EDM_007",
+        "title": "Synthetic: bms_cell_imbalance",
+        "ground_truth": [
+          "BMS cell imbalance / high internal resistance cell"
+        ],
+        "top_predictions": [
+          {
+            "hypothesis": "BMS cell imbalance / high internal resistance cell",
+            "prob": 0.68,
+            "reason": [
+              "high Ia, low Vdc_min",
+              "normal coolant temp",
+              "inverter status OK"
+            ]
+          }
+        ],
+        "top1_correct": true,
+        "top3_correct": true,
+        "trace_steps": [
+          {
+            "model_resp": {
+              "scenario_id": "EDM_007",
+              "predictions": [
+                {
+                  "hypothesis": "BMS cell imbalance / high internal resistance cell",
+                  "prob": 0.8,
+                  "reason": [
+                    "high Ia and low Vdc_min suggest cell impedance",
+                    "coolant temp normal"
+                  ],
+                  "tests": [
+                    "measure cell_voltage_history",
+                    "measure cell_internal_resistance_last_60s_mean"
+                  ],
+                  "mitigation": "Isolate affected cell, replace/repair and rebalance the pack"
+                }
+              ],
+              "requested_measurements": [
+                "cell_voltage_history",
+                "cell_internal_resistance_last_60s_mean"
+              ],
+              "explanation": "Current and DC voltage trends point to cell impedance; obtaining cell voltage and resistance data will confirm the imbalance."
+            },
+            "measurements": {
+              "cell_voltage_history": "NOT_AVAILABLE",
+              "cell_internal_resistance_last_60s_mean": "NOT_AVAILABLE"
+            }
+          },
+          {
+            "model_resp": {
+              "scenario_id": "EDM_007",
+              "predictions": [
+                {
+                  "hypothesis": "BMS cell imbalance / high internal resistance cell",
+                  "prob": 0.8,
+                  "reason": [
+                    "high Ia and low Vdc_min suggest cell impedance",
+                    "coolant temp normal",
+                    "inverter status OK"
+                  ],
+                  "tests": [
+                    "measure cell_voltage_history",
+                    "measure cell_internal_resistance_last_60s_mean"
+                  ],
+                  "mitigation": "Isolate affected cell, replace/repair and rebalance the pack"
+                }
+              ],
+              "requested_measurements": [
+                "cell_voltage_history",
+                "cell_internal_resistance_last_60s_mean"
+              ],
+              "explanation": "Current and DC voltage trends point to cell impedance; obtaining cell voltage and resistance data will confirm the imbalance."
+            },
+            "measurements": {
+              "cell_voltage_history": "NOT_AVAILABLE",
+              "cell_internal_resistance_last_60s_mean": "NOT_AVAILABLE"
+            }
+          },
+          {
+            "model_resp": {
+              "scenario_id": "EDM_007",
+              "predictions": [
+                {
+                  "hypothesis": "BMS cell imbalance / high internal resistance cell",
+                  "prob": 0.68,
+                  "reason": [
+                    "high Ia, low Vdc_min",
+                    "normal coolant temp",
+                    "inverter status OK"
+                  ],
+                  "tests": [
+                    "measure cell_voltage_1_history",
+                    "measure cell_voltage_1_last_60s_mean",
+                    "measure cell_voltage_2_history",
+                    "measure cell_voltage_2_last_60s_mean",
+                    "measure Vdc_min_last_60s_mean",
+                    "measure Vdc_max_last_60s_mean"
+                  ],
+                  "mitigation": "Isolate affected cells, replace/repair, rebalance the pack"
+                }
+              ],
+              "requested_measurements": [
+                "cell_voltage_1_history",
+                "cell_voltage_1_last_60s_mean",
+                "cell_voltage_2_history",
+                "cell_voltage_2_last_60s_mean",
+                "Vdc_min_last_60s_mean",
+                "Vdc_max_last_60s_mean"
+              ],
+              "explanation": "Ia and Vdc trends point to cell impedance; additional voltage history will confirm imbalance."
+            },
+            "measurements": {
+              "cell_voltage_1_history": "NOT_AVAILABLE",
+              "cell_voltage_1_last_60s_mean": "NOT_AVAILABLE",
+              "cell_voltage_2_history": "NOT_AVAILABLE",
+              "cell_voltage_2_last_60s_mean": "NOT_AVAILABLE",
+              "Vdc_min_last_60s_mean": "NOT_AVAILABLE",
+              "Vdc_max_last_60s_mean": "NOT_AVAILABLE"
+            }
+          }
+        ],
+        "debug_raw_exists": false,
+        "model_output_path": "synthetic_edm/model_outputs/model_output_EDM_007.json",
+        "trace_path": "synthetic_edm/model_outputs/model_trace_EDM_007.json"
+      },
+      {
+        "scenario_id": "EDM_008",
+        "title": "Synthetic: can_message_loss",
+        "ground_truth": [
+          "CAN message loss / gateway fault"
+        ],
+        "top_predictions": [
+          {
+            "hypothesis": "CAN gateway fault causing message loss",
+            "prob": 0.82,
+            "reason": [
+              "high CAN_drops_total (210)",
+              "inverter and power metrics normal",
+              "root\u2011cause list includes CAN fault"
+            ]
+          }
+        ],
+        "top1_correct": false,
+        "top3_correct": false,
+        "trace_steps": [
+          {
+            "model_resp": {
+              "scenario_id": "EDM_008",
+              "predictions": [
+                {
+                  "hypothesis": "CAN gateway fault causing message loss",
+                  "prob": 0.85,
+                  "reason": [
+                    "high CAN_drops_total (210)",
+                    "no inverter status anomalies",
+                    "normal Vdc and Ia",
+                    "root cause list matches"
+                  ],
+                  "tests": [
+                    "measure CAN error frames and bus error counters",
+                    "run gateway self\u2011test diagnostics",
+                    "check CAN message integrity"
+                  ],
+                  "mitigation": "isolate and replace gateway unit, verify bus health before resuming operation"
+                }
+              ],
+              "requested_measurements": [
+                "CAN_drops_total"
+              ],
+              "explanation": "The data shows significant CAN drops with otherwise healthy system metrics; a gateway fault is the most likely root cause."
+            },
+            "measurements": {
+              "CAN_drops_total": 210
+            }
+          },
+          {
+            "model_resp": {
+              "scenario_id": "EDM_008",
+              "predictions": [
+                {
+                  "hypothesis": "CAN gateway fault causing message loss",
+                  "prob": 0.88,
+                  "reason": [
+                    "high CAN_drops_total (210)",
+                    "no inverter or power anomalies",
+                    "root cause list includes CAN fault"
+                  ],
+                  "tests": [
+                    "measure CAN_error_frames last 60s",
+                    "measure CAN_bus_error_counters",
+                    "run gateway self-test diagnostics"
+                  ],
+                  "mitigation": "replace/repair gateway unit and verify bus health before resuming operation"
+                }
+              ],
+              "requested_measurements": [
+                "CAN_error_frames",
+                "CAN_bus_error_counters"
+              ],
+              "explanation": "The data shows significant CAN drops with otherwise healthy inverter and power metrics, strongly indicating a gateway fault; additional error counters will confirm."
+            },
+            "measurements": {
+              "CAN_error_frames": "NOT_AVAILABLE",
+              "CAN_bus_error_counters": "NOT_AVAILABLE"
+            }
+          },
+          {
+            "model_resp": {
+              "scenario_id": "EDM_008",
+              "predictions": [
+                {
+                  "hypothesis": "CAN gateway fault causing message loss",
+                  "prob": 0.82,
+                  "reason": [
+                    "high CAN_drops_total (210)",
+                    "inverter and power metrics normal",
+                    "root\u2011cause list includes CAN fault"
+                  ],
+                  "tests": [
+                    "measure CAN_error_frames last 60s",
+                    "measure CAN_bus_error_counters last 60s",
+                    "run gateway self\u2011test"
+                  ],
+                  "mitigation": "replace or repair gateway unit, then reboot and verify bus health"
+                }
+              ],
+              "requested_measurements": [
+                "CAN_error_frames_last_60s",
+                "CAN_bus_error_counters_last_60s",
+                "CAN_drops_last_60s_mean",
+                "gateway_health_status"
+              ],
+              "explanation": "The large number of CAN drops with otherwise healthy electrical parameters points to a gateway fault; additional bus\u2011error metrics will confirm and help isolate the faulty component."
+            },
+            "measurements": {
+              "CAN_error_frames_last_60s": "NOT_AVAILABLE",
+              "CAN_bus_error_counters_last_60s": "NOT_AVAILABLE",
+              "CAN_drops_last_60s_mean": "NOT_AVAILABLE",
+              "gateway_health_status": "NOT_AVAILABLE"
+            }
+          }
+        ],
+        "debug_raw_exists": false,
+        "model_output_path": "synthetic_edm/model_outputs/model_output_EDM_008.json",
+        "trace_path": "synthetic_edm/model_outputs/model_trace_EDM_008.json"
+      },
+      {
+        "scenario_id": "EDM_009",
+        "title": "Synthetic: cooling_pump_failure",
+        "ground_truth": [
+          "Cooling pump failure"
+        ],
+        "top_predictions": [
+          {
+            "hypothesis": "Cooling pump failure",
+            "prob": 0.85,
+            "reason": [
+              "inverter THERMAL_DERATE",
+              "coolant_temp_max high",
+              "Vdc_min low",
+              "Ia_max high"
+            ]
+          }
+        ],
+        "top1_correct": true,
+        "top3_correct": true,
+        "trace_steps": [
+          {
+            "model_resp": {
+              "scenario_id": "EDM_009",
+              "predictions": [
+                {
+                  "hypothesis": "Cooling pump failure",
+                  "prob": 0.92,
+                  "reason": [
+                    "inverter THERMAL_DERATE",
+                    "coolant_temp_max high",
+                    "Ia_max elevated",
+                    "Vdc_min low"
+                  ],
+                  "tests": [
+                    "measure pump_motor_current last 60s mean",
+                    "measure coolant flow rate",
+                    "measure pump motor temperature"
+                  ],
+                  "mitigation": "Immediately stop vehicle, replace or repair cooling pump, verify coolant circulation"
+                }
+              ],
+              "requested_measurements": [
+                "pump_motor_current_last_60s_mean",
+                "pump_motor_current_history",
+                "coolant_temp_history"
+              ],
+              "explanation": "High coolant temperature coupled with inverter thermal derate and high inverter current suggest the cooling pump is not functioning, causing overheating."
+            },
+            "measurements": {
+              "pump_motor_current_last_60s_mean": "NOT_AVAILABLE",
+              "pump_motor_current_history": "NOT_AVAILABLE",
+              "coolant_temp_history": "NOT_AVAILABLE"
+            }
+          },
+          {
+            "model_resp": {
+              "scenario_id": "EDM_009",
+              "predictions": [
+                {
+                  "hypothesis": "Cooling pump failure",
+                  "prob": 0.9,
+                  "reason": [
+                    "inverter THERMAL_DERATE",
+                    "high coolant_temp_max",
+                    "elevated Ia_max",
+                    "low Vdc_min"
+                  ],
+                  "tests": [
+                    "measure pump_motor_current last 60s mean",
+                    "measure coolant flow rate",
+                    "measure pump motor temperature"
+                  ],
+                  "mitigation": "Immediately stop vehicle, replace or repair the cooling pump and verify coolant circulation"
+                }
+              ],
+              "requested_measurements": [
+                "pump_motor_current_last_60s_mean",
+                "pump_motor_current_history",
+                "coolant_flow_rate",
+                "pump_motor_temperature"
+              ],
+              "explanation": "High coolant temp, inverter derate, high Ia and low Vdc suggest pump failure; current, flow, and temperature measurements will confirm."
+            },
+            "measurements": {
+              "pump_motor_current_last_60s_mean": "NOT_AVAILABLE",
+              "pump_motor_current_history": "NOT_AVAILABLE",
+              "coolant_flow_rate": "NOT_AVAILABLE",
+              "pump_motor_temperature": "NOT_AVAILABLE"
+            }
+          },
+          {
+            "model_resp": {
+              "scenario_id": "EDM_009",
+              "predictions": [
+                {
+                  "hypothesis": "Cooling pump failure",
+                  "prob": 0.85,
+                  "reason": [
+                    "inverter THERMAL_DERATE",
+                    "coolant_temp_max high",
+                    "Vdc_min low",
+                    "Ia_max high"
+                  ],
+                  "tests": [
+                    "measure pump_motor_current_last_60s_mean",
+                    "measure coolant_flow_rate",
+                    "measure pump_motor_temperature"
+                  ],
+                  "mitigation": "Stop vehicle, inspect and replace or repair cooling pump"
+                }
+              ],
+              "requested_measurements": [
+                "pump_motor_current_last_60s_mean",
+                "pump_motor_current_history",
+                "coolant_flow_rate",
+                "pump_motor_temperature"
+              ],
+              "explanation": "High coolant temp and low Vdc with inverter derate point to pump failure; current and flow measurements will confirm."
+            },
+            "measurements": {
+              "pump_motor_current_last_60s_mean": "NOT_AVAILABLE",
+              "pump_motor_current_history": "NOT_AVAILABLE",
+              "coolant_flow_rate": "NOT_AVAILABLE",
+              "pump_motor_temperature": "NOT_AVAILABLE"
+            }
+          }
+        ],
+        "debug_raw_exists": false,
+        "model_output_path": "synthetic_edm/model_outputs/model_output_EDM_009.json",
+        "trace_path": "synthetic_edm/model_outputs/model_trace_EDM_009.json"
+      },
+      {
+        "scenario_id": "EDM_010",
+        "title": "Synthetic: phase_fet_short",
+        "ground_truth": [
+          "Phase FET short (phase A)"
+        ],
+        "top_predictions": [
+          {
+            "hypothesis": "Phase FET short (phase A)",
+            "prob": 0.7,
+            "reason": [
+              "inverter_status shows OVERCURRENT_FAULT",
+              "Ia_max unusually high (6783\u202fA)",
+              "Vdc_min low (298\u202fV)"
+            ]
+          }
+        ],
+        "top1_correct": true,
+        "top3_correct": true,
+        "trace_steps": [
+          {
+            "model_resp": {
+              "scenario_id": "EDM_010",
+              "predictions": [
+                {
+                  "hypothesis": "Phase FET short (phase A)",
+                  "prob": 0.85,
+                  "reason": [
+                    "inverter_status shows OVERCURRENT_FAULT",
+                    "Ia_max unusually high (6783\u202fA)",
+                    "Vdc_min low (298\u202fV)"
+                  ],
+                  "tests": [
+                    "measure Ia_max and Ia_history",
+                    "measure Vdc_min_last_60s_mean",
+                    "inspect phase A FET for short or failure"
+                  ],
+                  "mitigation": "Limit motor torque, schedule replacement of the affected FET"
+                }
+              ],
+              "requested_measurements": [
+                "Ia_history",
+                "Vdc_min_last_60s_mean"
+              ],
+              "explanation": "High current and low DC link voltage with overcurrent fault strongly indicate a shorted phase FET; confirming via current trend and direct FET inspection will resolve it."
+            },
+            "measurements": {
+              "Ia_history": "NOT_AVAILABLE",
+              "Vdc_min_last_60s_mean": "NOT_AVAILABLE"
+            }
+          },
+          {
+            "model_resp": {
+              "scenario_id": "EDM_010",
+              "predictions": [
+                {
+                  "hypothesis": "Phase FET short (phase A)",
+                  "prob": 0.65,
+                  "reason": [
+                    "inverter_status shows OVERCURRENT_FAULT",
+                    "Ia_max unusually high (6783\u202fA)",
+                    "Vdc_min low (298\u202fV)"
+                  ],
+                  "tests": [
+                    "measure Ia_max_last_60s_mean",
+                    "measure Vdc_min_last_60s_mean",
+                    "check inverter_status_last_60s",
+                    "inspect phase A FET for short"
+                  ],
+                  "mitigation": "limit motor torque, schedule replacement of the affected FET"
+                }
+              ],
+              "requested_measurements": [
+                "Ia_max_last_60s_mean",
+                "Vdc_min_last_60s_mean",
+                "inverter_status_last_60s"
+              ],
+              "explanation": "High inverter current and low DC\u2011link voltage with an overcurrent fault strongly suggest a phase\u2011A FET short; confirming the current and voltage trends and inspecting the FET will validate this hypothesis."
+            },
+            "measurements": {
+              "Ia_max_last_60s_mean": "NOT_AVAILABLE",
+              "Vdc_min_last_60s_mean": "NOT_AVAILABLE",
+              "inverter_status_last_60s": "NOT_AVAILABLE"
+            }
+          },
+          {
+            "model_resp": {
+              "scenario_id": "EDM_010",
+              "predictions": [
+                {
+                  "hypothesis": "Phase FET short (phase A)",
+                  "prob": 0.7,
+                  "reason": [
+                    "inverter_status shows OVERCURRENT_FAULT",
+                    "Ia_max unusually high (6783\u202fA)",
+                    "Vdc_min low (298\u202fV)"
+                  ],
+                  "tests": [
+                    "measure Ia_max_history",
+                    "measure Vdc_min_history",
+                    "measure inverter_status_last_60s"
+                  ],
+                  "mitigation": "limit motor torque and schedule replacement of the affected FET"
+                }
+              ],
+              "requested_measurements": [
+                "Ia_max_history",
+                "Vdc_min_history",
+                "inverter_status_last_60s"
+              ],
+              "explanation": "Overcurrent fault with high peak current and low DC\u2011link voltage strongly suggests a phase\u2011A FET short; historical current and voltage data will confirm the pattern."
+            },
+            "measurements": {
+              "Ia_max_history": "NOT_AVAILABLE",
+              "Vdc_min_history": "NOT_AVAILABLE",
+              "inverter_status_last_60s": "NOT_AVAILABLE"
+            }
+          }
+        ],
+        "debug_raw_exists": false,
+        "model_output_path": "synthetic_edm/model_outputs/model_output_EDM_010.json",
+        "trace_path": "synthetic_edm/model_outputs/model_trace_EDM_010.json"
+      }
+    ]
+  },
+  "summary": {
+    "total": 10,
+    "top1_accuracy": 0.8,
+    "top3_accuracy": 0.8
+  }
+}

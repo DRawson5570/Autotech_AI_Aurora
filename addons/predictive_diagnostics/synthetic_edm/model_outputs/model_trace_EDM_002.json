@@ -1,0 +1,143 @@
+{
+  "trace": [
+    [
+      {
+        "scenario_id": "EDM_002",
+        "predictions": [
+          {
+            "hypothesis": "Phase FET short (phase A)",
+            "prob": 0.92,
+            "reason": [
+              "overcurrent fault reported",
+              "Ia_max 6723A spike",
+              "Vdc_min 297.7V drop"
+            ],
+            "tests": [
+              "measure Ia history over last 60s",
+              "measure phase A bus voltage",
+              "measure phase A FET current and temperature"
+            ],
+            "mitigation": "immediately reduce inverter torque/limit output and schedule FET replacement"
+          }
+        ],
+        "requested_measurements": [
+          "Ia_max_last_60s",
+          "Ia_history",
+          "Vdc_min"
+        ],
+        "explanation": "High instantaneous current and low DC bus voltage with an overcurrent fault strongly indicate a FET short in phase A."
+      },
+      {
+        "Ia_max_last_60s": 676.1800650695897,
+        "Ia_history": [
+          1.2211475333588002,
+          105.83405915114092,
+          210.55374365787537,
+          317.0757208986158,
+          426.64283503195503,
+          534.5707146213242,
+          629.2944358791428,
+          666.8561650503839,
+          669.3789272461061,
+          677.0500544881054,
+          673.762359236918,
+          671.248740450723,
+          663.6403027112208,
+          666.5706723403208,
+          667.6394758349056,
+          664.7349176450618,
+          669.0130168506037,
+          658.2566876149529,
+          665.9479261876085,
+          664.9150190449071
+        ],
+        "Vdc_min": 297.6646593274202
+      }
+    ],
+    [
+      {
+        "scenario_id": "EDM_002",
+        "predictions": [
+          {
+            "hypothesis": "Phase FET short (phase A)",
+            "prob": 0.55,
+            "reason": [
+              "OVERCURRENT_FAULT reported",
+              "Vdc_min low at 297.7V",
+              "Ia_max spike in csv_summary"
+            ],
+            "tests": [
+              "measure phase A bus voltage over last 60s",
+              "measure phase A FET current and temperature",
+              "measure I_a trend for repeating spikes"
+            ],
+            "mitigation": "limit inverter torque and schedule immediate FET inspection"
+          }
+        ],
+        "requested_measurements": [
+          "Ia_max"
+        ],
+        "explanation": "Recent Ia_max_last_60s is normal, but a historical spike and DC bus sag still suggest a FET fault; further current/voltage measurements will confirm."
+      },
+      {
+        "Ia_max": 6723.135501558856
+      }
+    ],
+    [
+      {
+        "scenario_id": "EDM_002",
+        "predictions": [
+          {
+            "hypothesis": "Phase FET short (phase A)",
+            "prob": 0.78,
+            "reason": [
+              "OVERCURRENT_FAULT flag",
+              "Ia_max spike",
+              "Vdc_min sag",
+              "coolant temp within normal"
+            ],
+            "tests": [
+              "measure phase_A_bus_voltage_history",
+              "measure Ia_history",
+              "measure Vdc_min_last_60s_mean",
+              "measure phase_A_FET_temperature"
+            ],
+            "mitigation": "limit inverter torque and schedule immediate FET inspection"
+          }
+        ],
+        "requested_measurements": [
+          "Ia_history",
+          "Vdc_min_last_60s_mean",
+          "phase_A_bus_voltage_history"
+        ],
+        "explanation": "Overcurrent fault and high Ia_max with DC bus sag strongly indicate a phase\u2011A FET short; historical data will confirm the pattern."
+      },
+      {
+        "Ia_history": [
+          1.2211475333588002,
+          105.83405915114092,
+          210.55374365787537,
+          317.0757208986158,
+          426.64283503195503,
+          534.5707146213242,
+          629.2944358791428,
+          666.8561650503839,
+          669.3789272461061,
+          677.0500544881054,
+          673.762359236918,
+          671.248740450723,
+          663.6403027112208,
+          666.5706723403208,
+          667.6394758349056,
+          664.7349176450618,
+          669.0130168506037,
+          658.2566876149529,
+          665.9479261876085,
+          664.9150190449071
+        ],
+        "Vdc_min_last_60s_mean": 349.65908068557343,
+        "phase_A_bus_voltage_history": "NOT_AVAILABLE"
+      }
+    ]
+  ]
+}

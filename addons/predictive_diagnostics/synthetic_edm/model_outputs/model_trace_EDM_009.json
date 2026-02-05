@@ -1,0 +1,141 @@
+{
+  "trace": [
+    [
+      {
+        "scenario_id": "EDM_009",
+        "predictions": [
+          {
+            "hypothesis": "Cooling pump failure",
+            "prob": 0.8,
+            "reason": [
+              "high coolant_temp_max",
+              "inverter THERMAL_DERATE",
+              "high Ia_max"
+            ],
+            "tests": [
+              "measure pump_motor_current_last_60s_mean",
+              "measure pump_motor_current_history",
+              "verify coolant flow rate"
+            ],
+            "mitigation": "Limit torque, schedule pump repair or replacement"
+          }
+        ],
+        "requested_measurements": [
+          "pump_motor_current_last_60s_mean",
+          "pump_motor_current_history"
+        ],
+        "explanation": "Elevated coolant temperature and inverter derating point to loss of cooling capacity, while the surge in Ia_max suggests the inverter is compensating for a failed pump. Measuring pump current and flow will confirm the failure."
+      },
+      {
+        "pump_motor_current_last_60s_mean": "NOT_AVAILABLE",
+        "pump_motor_current_history": [
+          1.902512870852153,
+          2.11089763672246,
+          2.110679145501185,
+          2.1060882683300384,
+          1.9175208173978209,
+          2.092088253657495,
+          2.1268972661378176,
+          0.1002975529780513,
+          0.1051507614207427,
+          0.1060479052778174,
+          0.1026019924671368,
+          0.1001946318110093,
+          0.0989812773800662,
+          0.0976822648342234,
+          0.1039625018540408,
+          0.1022400872813595,
+          0.1076568919686288,
+          0.1003332758029508,
+          0.094489961139657,
+          0.0918561191429888
+        ]
+      }
+    ],
+    [
+      {
+        "scenario_id": "EDM_009",
+        "predictions": [
+          {
+            "hypothesis": "Cooling pump failure",
+            "prob": 0.97,
+            "reason": [
+              "high coolant_temp_max",
+              "inverter THERMAL_DERATE",
+              "pump current drop to zero"
+            ],
+            "tests": [
+              "measure coolant flow rate",
+              "verify pump motor status"
+            ],
+            "mitigation": "limit torque, schedule pump repair or replacement"
+          }
+        ],
+        "requested_measurements": [
+          "coolant_flow_rate",
+          "pump_motor_current_last_60s_mean"
+        ],
+        "explanation": "Pump current history shows a sudden drop to near zero, consistent with a failed pump, while the high coolant temperature and inverter derate confirm loss of cooling capacity."
+      },
+      {
+        "coolant_flow_rate": "NOT_AVAILABLE",
+        "pump_motor_current_last_60s_mean": "NOT_AVAILABLE"
+      }
+    ],
+    [
+      {
+        "scenario_id": "EDM_009",
+        "predictions": [
+          {
+            "hypothesis": "Cooling pump failure",
+            "prob": 0.85,
+            "reason": [
+              "high coolant_temp_max",
+              "inverter THERMAL_DERATE",
+              "no flow data",
+              "pump current unavailable"
+            ],
+            "tests": [
+              "measure pump_motor_current_history",
+              "measure coolant_temp_last_60s_mean",
+              "measure inverter_status_last_60s"
+            ],
+            "mitigation": "limit torque, schedule pump repair or replacement"
+          }
+        ],
+        "requested_measurements": [
+          "pump_motor_current_history",
+          "coolant_temp_last_60s_mean",
+          "inverter_status_last_60s"
+        ],
+        "explanation": "High temperature and inverter derate still point to cooling failure; missing pump current necessitates fresh current trend, temperature trend, and inverter status to confirm."
+      },
+      {
+        "pump_motor_current_history": [
+          1.902512870852153,
+          2.11089763672246,
+          2.110679145501185,
+          2.1060882683300384,
+          1.9175208173978209,
+          2.092088253657495,
+          2.1268972661378176,
+          0.1002975529780513,
+          0.1051507614207427,
+          0.1060479052778174,
+          0.1026019924671368,
+          0.1001946318110093,
+          0.0989812773800662,
+          0.0976822648342234,
+          0.1039625018540408,
+          0.1022400872813595,
+          0.1076568919686288,
+          0.1003332758029508,
+          0.094489961139657,
+          0.0918561191429888
+        ],
+        "coolant_temp_last_60s_mean": "NOT_AVAILABLE",
+        "inverter_status_last_60s": "NOT_AVAILABLE"
+      }
+    ]
+  ]
+}

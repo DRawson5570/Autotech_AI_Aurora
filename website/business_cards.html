@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autotech AI Business Cards</title>
+    <style>
+        @page {
+            size: letter;
+            margin: 0.5in 0.75in;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f0f0;
+        }
+        
+        .sheet {
+            width: 8.5in;
+            height: 11in;
+            background: white;
+            margin: 0 auto;
+            padding: 0.5in 0.75in;
+            display: grid;
+            grid-template-columns: repeat(2, 3.5in);
+            grid-template-rows: repeat(5, 2in);
+            gap: 0;
+        }
+        
+        .card {
+            width: 3.5in;
+            height: 2in;
+            padding: 0.2in;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background: white;
+            color: #1a1a2e;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #ddd;
+            transition: all 0.3s ease;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #00d4ff, #0099cc);
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+        
+        /* Dark theme */
+        body.dark-theme .card {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: white;
+            border: none;
+        }
+        
+        body.dark-theme .card::before {
+            bottom: auto;
+            top: -50%;
+            right: -50%;
+            left: auto;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(0,212,255,0.1) 0%, transparent 70%);
+        }
+        
+        .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 0.1in;
+        }
+        
+        .logo {
+            width: 0.4in;
+            height: 0.4in;
+            background: linear-gradient(135deg, #0099cc, #006688);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            color: white;
+        }
+        
+        .company-name {
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: #1a1a2e;
+        }
+        
+        .tagline {
+            font-size: 8px;
+            color: #0099cc;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 2px;
+        }
+        
+        /* Dark theme overrides */
+        body.dark-theme .logo {
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: #1a1a2e;
+        }
+        
+        body.dark-theme .company-name {
+            color: white;
+        }
+        
+        body.dark-theme .tagline {
+            color: #00d4ff;
+        }
+        
+        .card-middle {
+            text-align: left;
+        }
+        
+        .name {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+        
+        .title {
+            font-size: 9px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .card-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            font-size: 8px;
+            color: #555;
+        }
+        
+        .contact-info {
+            line-height: 1.6;
+        }
+        
+        .website {
+            text-align: right;
+            color: #0099cc;
+            font-weight: 500;
+        }
+        
+        /* Dark theme overrides */
+        body.dark-theme .title {
+            color: #aaa;
+        }
+        
+        body.dark-theme .card-bottom {
+            color: #ccc;
+        }
+        
+        body.dark-theme .website {
+            color: #00d4ff;
+        }
+        
+        /* Theme toggle switch */
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .theme-toggle label {
+            margin: 0;
+        }
+        
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+        }
+        
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .3s;
+            border-radius: 26px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: #1a1a2e;
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+        
+        /* Editor controls - hidden when printing */
+        .editor {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .editor h2 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .editor label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: 500;
+            color: #555;
+        }
+        
+        .editor input, .editor textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .editor button {
+            margin-top: 15px;
+            padding: 12px 24px;
+            background: #0f3460;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+        
+        .editor button:hover {
+            background: #1a1a2e;
+        }
+        
+        @media print {
+            body {
+                background: white;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            
+            .editor {
+                display: none !important;
+            }
+            
+            .sheet {
+                margin: 0 auto;
+                padding: 0.5in 0.75in;
+                box-shadow: none;
+                width: 8.5in;
+                height: 11in;
+            }
+            
+            .card {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="editor">
+        <h2>✏️ Edit Business Card</h2>
+        <label>Name</label>
+        <input type="text" id="name" value="Douglas Rawson" oninput="updateCards()">
+        
+        <label>Title</label>
+        <input type="text" id="title" value="Founder & Developer" oninput="updateCards()">
+        
+        <label>Email</label>
+        <input type="text" id="email" value="drawson@aurora-sentient.net" oninput="updateCards()">
+        
+        <label>Phone</label>
+        <input type="text" id="phone" value="614-325-9207" oninput="updateCards()">
+        
+        <label>Website</label>
+        <input type="text" id="website" value="automotive.aurora-sentient.net" oninput="updateCards()">
+        
+        <label>Tagline</label>
+        <input type="text" id="tagline" value="Expert Diagnostics for Every Technician" oninput="updateCards()">
+        
+        <div class="theme-toggle">
+            <span>☀️ Light</span>
+            <label class="switch">
+                <input type="checkbox" id="darkMode" onchange="toggleTheme()">
+                <span class="slider"></span>
+            </label>
+            <span>🌙 Dark</span>
+        </div>
+        
+        <button onclick="window.print()">🖨️ Print Cards</button>
+        <button onclick="resetDefaults()">↩️ Reset</button>
+    </div>
+    
+    <div class="sheet">
+        <!-- 10 cards (2x5 grid) -->
+    </div>
+    
+    <script>
+        function createCard() {
+            return `
+                <div class="card">
+                    <div class="card-top">
+                        <div class="logo-section">
+                            <div class="logo">AI</div>
+                            <div>
+                                <div class="company-name">AUTOTECH AI</div>
+                                <div class="tagline">${document.getElementById('tagline').value}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-middle">
+                        <div class="name">${document.getElementById('name').value}</div>
+                        <div class="title">${document.getElementById('title').value}</div>
+                    </div>
+                    <div class="card-bottom">
+                        <div class="contact-info">
+                            ${document.getElementById('email').value}<br>
+                            ${document.getElementById('phone').value}
+                        </div>
+                        <div class="website">${document.getElementById('website').value}</div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function updateCards() {
+            const sheet = document.querySelector('.sheet');
+            sheet.innerHTML = '';
+            for (let i = 0; i < 10; i++) {
+                sheet.innerHTML += createCard();
+            }
+        }
+        
+        function resetDefaults() {
+            document.getElementById('name').value = 'Douglas Rawson';
+            document.getElementById('title').value = 'Founder & Developer';
+            document.getElementById('email').value = 'drawson@aurora-sentient.net';
+            document.getElementById('phone').value = '614-325-9207';
+            document.getElementById('website').value = 'automotive.aurora-sentient.net';
+            document.getElementById('tagline').value = 'Expert Diagnostics for Every Technician';
+            updateCards();
+        }
+        
+        function toggleTheme() {
+            const isDark = document.getElementById('darkMode').checked;
+            if (isDark) {
+                document.body.classList.add('dark-theme');
+            } else {
+                document.body.classList.remove('dark-theme');
+            }
+        }
+        
+        // Initialize
+        updateCards();
+    </script>
+</body>
+</html>

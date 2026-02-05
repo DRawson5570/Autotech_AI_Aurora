@@ -1,0 +1,31 @@
+.git
+*.pyc
+__pycache__/
+.venv
+venv/
+.env
+.env.*
+*.local
+node_modules/
+build/
+dist/
+frontend/build/
+# Database and server files - DO NOT overwrite on prod
+backend/data/
+backend/data/**
+# Uploads/cache/vector DB
+backend/data/cache/
+backend/data/uploads/
+backend/data/vector_db/
+# Other potentially large or machine-specific directories
+save_google/
+prod/
+/tmp/
+*.sqlite3
+*.db
+secrets.json
+*.pem
+*.key
+# Editor/OS files
+.DS_Store
+*.swp

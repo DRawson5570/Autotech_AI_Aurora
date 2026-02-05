@@ -1,0 +1,111 @@
+{
+  "trace": [
+    [
+      {
+        "scenario_id": "EDM_010",
+        "predictions": [
+          {
+            "hypothesis": "Phase FET short (phase A)",
+            "prob": 0.95,
+            "reason": [
+              "Ia_max 6783 A with overcurrent fault",
+              "inverter status shows OVERCURRENT_FAULT",
+              "phase imbalance likely due to FET short"
+            ],
+            "tests": [
+              "measure phase current history",
+              "measure phase voltage to ground",
+              "measure inverter temperature"
+            ],
+            "mitigation": "isolate affected phase, limit torque, schedule component repair"
+          }
+        ],
+        "requested_measurements": [
+          "Ia_max_last_60s",
+          "inverter_current_history",
+          "phase_current_history",
+          "phase_voltage_to_ground",
+          "inverter_temperature"
+        ],
+        "explanation": "High inverter current and overcurrent fault indicate a phase FET short; additional current and voltage measurements will confirm the affected phase."
+      },
+      {
+        "Ia_max_last_60s": "NOT_AVAILABLE",
+        "inverter_current_history": "NOT_AVAILABLE",
+        "phase_current_history": "NOT_AVAILABLE",
+        "phase_voltage_to_ground": "NOT_AVAILABLE",
+        "inverter_temperature": "NOT_AVAILABLE"
+      }
+    ],
+    [
+      {
+        "scenario_id": "EDM_010",
+        "predictions": [
+          {
+            "hypothesis": "Phase FET short (phase A)",
+            "prob": 0.95,
+            "reason": [
+              "Ia_max 6783 A",
+              "OVERCURRENT_FAULT status",
+              "phase imbalance likely"
+            ],
+            "tests": [
+              "measure phase current history",
+              "measure phase voltage to ground",
+              "measure inverter temperature"
+            ],
+            "mitigation": "Isolate phase, limit torque, schedule repair"
+          }
+        ],
+        "requested_measurements": [
+          "Ia_max_last_60s",
+          "inverter_current_history",
+          "phase_current_history",
+          "phase_voltage_to_ground",
+          "inverter_temperature"
+        ],
+        "explanation": "Overcurrent fault and high Ia_max strongly suggest a phase FET short; requested diagnostics will confirm the affected phase."
+      },
+      {
+        "Ia_max_last_60s": "NOT_AVAILABLE",
+        "inverter_current_history": "NOT_AVAILABLE",
+        "phase_current_history": "NOT_AVAILABLE",
+        "phase_voltage_to_ground": "NOT_AVAILABLE",
+        "inverter_temperature": "NOT_AVAILABLE"
+      }
+    ],
+    [
+      {
+        "scenario_id": "EDM_010",
+        "predictions": [
+          {
+            "hypothesis": "Phase FET short (phase A)",
+            "prob": 0.92,
+            "reason": [
+              "Ia_max 6783 A",
+              "OVERCURRENT_FAULT status",
+              "high Ia_median"
+            ],
+            "tests": [
+              "measure phase current history",
+              "measure phase voltage to ground",
+              "measure inverter temperature"
+            ],
+            "mitigation": "Isolate phase, limit torque, schedule repair"
+          }
+        ],
+        "requested_measurements": [
+          "phase_current_history",
+          "phase_voltage_to_ground",
+          "inverter_temperature"
+        ],
+        "explanation": "High current and overcurrent fault strongly point to phase FET short; requesting detailed phase data and temperature will confirm."
+      },
+      {
+        "phase_current_history": "NOT_AVAILABLE",
+        "phase_voltage_to_ground": "NOT_AVAILABLE",
+        "inverter_temperature": "NOT_AVAILABLE"
+      }
+    ]
+  ]
+}

@@ -1,0 +1,286 @@
+{
+  "trace": [
+    [
+      {
+        "scenario_id": "EDM_003",
+        "predictions": [
+          {
+            "hypothesis": "BMS cell imbalance/high internal resistance cell",
+            "prob": 0.85,
+            "reason": [
+              "Ia_max near upper bound",
+              "Vdc_min close to lower spec",
+              "no CAN drops but high current suggests cell mismatch"
+            ],
+            "tests": [
+              "measure cell_voltage_1_history",
+              "measure cell_voltage_1_last_60s_mean",
+              "measure cell_voltage_2_history",
+              "measure cell_voltage_2_last_60s_mean",
+              "measure cell_internal_resistance_history",
+              "measure cell_temperature_history"
+            ],
+            "mitigation": "Limit battery load, schedule cell replacement and recalibration"
+          }
+        ],
+        "requested_measurements": [
+          "cell_voltage_1_history",
+          "cell_voltage_1_last_60s_mean",
+          "cell_voltage_2_history",
+          "cell_voltage_2_last_60s_mean",
+          "cell_internal_resistance_history",
+          "cell_temperature_history"
+        ],
+        "explanation": "High current draw with low Vdc indicates a cell is lagging; voltage history and resistance measurements will confirm imbalance."
+      },
+      {
+        "cell_voltage_1_history": [
+          87.61653734836536,
+          87.33519421675702,
+          87.75534062667798,
+          87.61478289956769,
+          87.31779031132325,
+          87.13565650207465,
+          87.56452736381816,
+          87.56880474928379,
+          87.97019049514708,
+          87.50220733453757,
+          86.89268552321751,
+          87.85395251456445,
+          87.30136119476417,
+          87.66942218827347,
+          87.74339938377675,
+          87.60830528443981,
+          87.40966757978684,
+          87.24369188806014,
+          87.52212910714275,
+          87.80962352091262
+        ],
+        "cell_voltage_1_last_60s_mean": "NOT_AVAILABLE",
+        "cell_voltage_2_history": [
+          87.74227436790405,
+          87.387361145381,
+          87.77146564351952,
+          87.53977055064873,
+          87.34394666568382,
+          87.07228828429076,
+          87.50815016180479,
+          87.527422390116,
+          87.81762137096312,
+          87.30996773782778,
+          86.6061263185559,
+          87.5465254830285,
+          87.11287328095113,
+          87.37167494769847,
+          87.50118683748586,
+          87.2284305739452,
+          87.12025499970986,
+          86.75857466699998,
+          87.01849817265705,
+          87.38492506173493
+        ],
+        "cell_voltage_2_last_60s_mean": "NOT_AVAILABLE",
+        "cell_internal_resistance_history": [
+          87.61653734836536,
+          87.33519421675702,
+          87.75534062667798,
+          87.61478289956769,
+          87.31779031132325,
+          87.13565650207465,
+          87.56452736381816,
+          87.56880474928379,
+          87.97019049514708,
+          87.50220733453757,
+          86.89268552321751,
+          87.85395251456445,
+          87.30136119476417,
+          87.66942218827347,
+          87.74339938377675,
+          87.60830528443981,
+          87.40966757978684,
+          87.24369188806014,
+          87.52212910714275,
+          87.80962352091262
+        ],
+        "cell_temperature_history": [
+          87.61653734836536,
+          87.33519421675702,
+          87.75534062667798,
+          87.61478289956769,
+          87.31779031132325,
+          87.13565650207465,
+          87.56452736381816,
+          87.56880474928379,
+          87.97019049514708,
+          87.50220733453757,
+          86.89268552321751,
+          87.85395251456445,
+          87.30136119476417,
+          87.66942218827347,
+          87.74339938377675,
+          87.60830528443981,
+          87.40966757978684,
+          87.24369188806014,
+          87.52212910714275,
+          87.80962352091262
+        ]
+      }
+    ],
+    [
+      {
+        "scenario_id": "EDM_003",
+        "predictions": [
+          {
+            "hypothesis": "BMS cell imbalance / high internal resistance cell",
+            "prob": 0.7,
+            "reason": [
+              "Ia_max high relative to Vdc_min",
+              "Vdc_min near lower spec",
+              "cell voltage history similar but mean needed for confirmation"
+            ],
+            "tests": [
+              "measure cell_voltage_1_last_60s_mean",
+              "measure cell_voltage_2_last_60s_mean",
+              "measure cell_internal_resistance_last_60s_mean",
+              "measure cell_temperature_last_60s_mean"
+            ],
+            "mitigation": "limit battery load, schedule cell inspection/replacement"
+          }
+        ],
+        "requested_measurements": [
+          "cell_voltage_1_last_60s_mean",
+          "cell_voltage_2_last_60s_mean",
+          "cell_internal_resistance_last_60s_mean",
+          "cell_temperature_last_60s_mean"
+        ],
+        "explanation": "High current and low DC bus voltage indicate a lagging cell; mean voltage and resistance will confirm imbalance."
+      },
+      {
+        "cell_voltage_1_last_60s_mean": "NOT_AVAILABLE",
+        "cell_voltage_2_last_60s_mean": "NOT_AVAILABLE",
+        "cell_internal_resistance_last_60s_mean": "NOT_AVAILABLE",
+        "cell_temperature_last_60s_mean": "NOT_AVAILABLE"
+      }
+    ],
+    [
+      {
+        "scenario_id": "EDM_003",
+        "predictions": [
+          {
+            "hypothesis": "BMS cell imbalance / high internal resistance cell",
+            "prob": 0.5,
+            "reason": [
+              "Ia_max high vs Vdc_min low",
+              "coolant temp within limits",
+              "no immediate failure signs"
+            ],
+            "tests": [
+              "measure cell_voltage_1_history",
+              "measure cell_voltage_2_history",
+              "measure cell_internal_resistance_history",
+              "measure cell_temperature_history"
+            ],
+            "mitigation": "reduce battery load, schedule inspection of suspected cells"
+          }
+        ],
+        "requested_measurements": [
+          "cell_voltage_1_history",
+          "cell_voltage_2_history",
+          "cell_internal_resistance_history",
+          "cell_temperature_history"
+        ],
+        "explanation": "Current data shows high current and low DC bus voltage, suggestive of a lagging cell; history measurements are needed to confirm imbalance."
+      },
+      {
+        "cell_voltage_1_history": [
+          87.61653734836536,
+          87.33519421675702,
+          87.75534062667798,
+          87.61478289956769,
+          87.31779031132325,
+          87.13565650207465,
+          87.56452736381816,
+          87.56880474928379,
+          87.97019049514708,
+          87.50220733453757,
+          86.89268552321751,
+          87.85395251456445,
+          87.30136119476417,
+          87.66942218827347,
+          87.74339938377675,
+          87.60830528443981,
+          87.40966757978684,
+          87.24369188806014,
+          87.52212910714275,
+          87.80962352091262
+        ],
+        "cell_voltage_2_history": [
+          87.74227436790405,
+          87.387361145381,
+          87.77146564351952,
+          87.53977055064873,
+          87.34394666568382,
+          87.07228828429076,
+          87.50815016180479,
+          87.527422390116,
+          87.81762137096312,
+          87.30996773782778,
+          86.6061263185559,
+          87.5465254830285,
+          87.11287328095113,
+          87.37167494769847,
+          87.50118683748586,
+          87.2284305739452,
+          87.12025499970986,
+          86.75857466699998,
+          87.01849817265705,
+          87.38492506173493
+        ],
+        "cell_internal_resistance_history": [
+          87.61653734836536,
+          87.33519421675702,
+          87.75534062667798,
+          87.61478289956769,
+          87.31779031132325,
+          87.13565650207465,
+          87.56452736381816,
+          87.56880474928379,
+          87.97019049514708,
+          87.50220733453757,
+          86.89268552321751,
+          87.85395251456445,
+          87.30136119476417,
+          87.66942218827347,
+          87.74339938377675,
+          87.60830528443981,
+          87.40966757978684,
+          87.24369188806014,
+          87.52212910714275,
+          87.80962352091262
+        ],
+        "cell_temperature_history": [
+          87.61653734836536,
+          87.33519421675702,
+          87.75534062667798,
+          87.61478289956769,
+          87.31779031132325,
+          87.13565650207465,
+          87.56452736381816,
+          87.56880474928379,
+          87.97019049514708,
+          87.50220733453757,
+          86.89268552321751,
+          87.85395251456445,
+          87.30136119476417,
+          87.66942218827347,
+          87.74339938377675,
+          87.60830528443981,
+          87.40966757978684,
+          87.24369188806014,
+          87.52212910714275,
+          87.80962352091262
+        ]
+      }
+    ]
+  ]
+}

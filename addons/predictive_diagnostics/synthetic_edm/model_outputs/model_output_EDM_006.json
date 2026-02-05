@@ -1,0 +1,26 @@
+{
+  "scenario_id": "EDM_006",
+  "predictions": [
+    {
+      "hypothesis": "Phase A FET short",
+      "prob": 0.75,
+      "reason": [
+        "OVERCURRENT_FAULT & high Ia_max",
+        "coolant temp near limit",
+        "inverter status indicates current fault"
+      ],
+      "tests": [
+        "measure phase_A_current_history",
+        "measure Vdc_min_last_60s_mean",
+        "measure phase_B_current_history"
+      ],
+      "mitigation": "shutdown motor, limit load, schedule FET replacement"
+    }
+  ],
+  "requested_measurements": [
+    "phase_A_current_history",
+    "Vdc_min_last_60s_mean",
+    "phase_B_current_history"
+  ],
+  "explanation": "High current, inverter fault, and near\u2011max coolant temp point to a phase\u2011FET short; additional phase current and DC\u2011bus data are needed to confirm."
+}

@@ -1,0 +1,25 @@
+[Unit]
+Description=ELM327 OBD-II Simulator for Autotech AI
+After=network.target
+
+[Service]
+Type=simple
+User=drawson
+Group=drawson
+WorkingDirectory=/home/drawson/autotech_ai
+Environment="PATH=/home/drawson/anaconda3/envs/open-webui/bin:/usr/local/bin:/usr/bin:/bin"
+ExecStart=/home/drawson/anaconda3/envs/open-webui/bin/python -m addons.scan_tool.simulator --port 35000 --state lean_both_banks
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+# Security hardening
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/tmp
+
+[Install]
+WantedBy=multi-user.target

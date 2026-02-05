@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Full Diagnostic Report Example - Autotech AI</title>
+    <meta name="description" content="Combine DTCs, PIDs, and symptoms for a comprehensive AI diagnostic report." />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: { sans: ['Inter', 'sans-serif'] },
+            colors: {
+              slate: { 800: '#1e293b', 850: '#171717', 900: '#0a0a0a', 950: '#050505' },
+              brand: { blue: '#06b6d4', orange: '#14b8a6', accent: '#22d3ee', dark: '#083344' }
+            },
+          },
+        },
+      }
+    </script>
+    <style>
+      ::-webkit-scrollbar { width: 10px; }
+      ::-webkit-scrollbar-track { background: #0a0a0a; }
+      ::-webkit-scrollbar-thumb { background: #334155; border-radius: 5px; }
+    </style>
+  </head>
+  <body class="bg-slate-950 text-slate-200 font-sans antialiased">
+    
+    <!-- Header -->
+    <header class="fixed w-full top-0 z-50 bg-slate-950/90 backdrop-blur-md border-b border-slate-800/50">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+          <a href="/" class="flex items-center space-x-2">
+            <div class="bg-gradient-to-br from-cyan-500 to-cyan-400 p-2 rounded-lg">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              </svg>
+            </div>
+            <span class="text-xl font-bold text-white tracking-tight">Autotech <span class="text-cyan-400">AI</span></span>
+          </a>
+          <nav class="hidden md:flex space-x-8">
+            <a href="/" class="text-slate-300 hover:text-white transition-colors">Home</a>
+            <a href="/examples/" class="text-brand-blue font-medium">Examples</a>
+          </nav>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="pt-24 pb-16">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Breadcrumb -->
+        <nav class="mb-8 text-sm">
+          <a href="/examples/" class="text-slate-400 hover:text-white">Examples</a>
+          <span class="text-slate-600 mx-2">/</span>
+          <span class="text-brand-blue">Full Diagnostic Report</span>
+        </nav>
+
+        <!-- Page Header -->
+        <div class="mb-12">
+          <span class="inline-block px-3 py-1 text-xs font-medium text-purple-400 bg-purple-500/20 rounded-full mb-4">Advanced</span>
+          <h1 class="text-4xl font-extrabold text-white mb-4">Full Diagnostic Report</h1>
+          <p class="text-xl text-slate-400">Combine all your data — DTCs, PIDs, and symptoms — for a comprehensive analysis with confidence scores.</p>
+        </div>
+
+        <!-- Info Box -->
+        <div class="bg-purple-500/10 border border-purple-500/30 rounded-2xl p-6 mb-8">
+          <h2 class="text-lg font-bold text-white mb-3 flex items-center">
+            <span class="text-2xl mr-3">🧠</span> How It Works
+          </h2>
+          <p class="text-slate-300 mb-3">
+            When you provide <strong>DTCs + sensor data + symptoms</strong>, Autotech AI uses a <strong class="text-purple-300">hybrid diagnostic engine</strong> that combines:
+          </p>
+          <ul class="text-slate-300 space-y-1 ml-6 list-disc">
+            <li><strong class="text-white">ML Model (90% accuracy)</strong> — Trained on 45,000+ fault scenarios to predict failure modes</li>
+            <li><strong class="text-white">Bayesian Reasoning</strong> — Updates probabilities based on your specific evidence</li>
+            <li><strong class="text-white">Knowledge Graph</strong> — Vehicle-specific TSBs, common failures, and causal relationships</li>
+          </ul>
+        </div>
+
+        <!-- Scenario Box -->
+        <div class="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 mb-8">
+          <h2 class="text-lg font-bold text-white mb-3 flex items-center">
+            <span class="text-2xl mr-3">📋</span> The Scenario
+          </h2>
+          <p class="text-slate-300">
+            A 2018 Honda Accord 2.0T with multiple symptoms and codes. You've got the full picture from your scan tool.
+          </p>
+        </div>
+
+        <!-- The Query -->
+        <div class="mb-10">
+          <h2 class="text-2xl font-bold text-white mb-4 flex items-center">
+            <span class="w-8 h-8 bg-brand-blue rounded-full flex items-center justify-center text-sm font-bold text-white mr-3">1</span>
+            Provide All Available Data
+          </h2>
+          
+          <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+            <div class="bg-slate-800 px-4 py-2 text-xs text-slate-400 border-b border-slate-700">
+              Your message
+            </div>
+            <div class="p-4">
+              <p class="text-white font-mono text-sm bg-slate-800 rounded-lg p-4 whitespace-pre-line">diagnose vehicle issue:
+2018 Honda Accord 2.0T
+Symptoms: Engine running rough at idle, hesitation on acceleration, check engine light on
+DTCs: P0300 (random misfire), P0171 (system too lean bank 1)
+
+PIDs:
+• Engine RPM: 650 (rough idle)
+• Short Term Fuel Trim: +18% (high positive)
+• Long Term Fuel Trim: +15%
+• MAF: 3.2 g/s at idle
+• Intake Air Temp: 75°F
+• Coolant Temp: 195°F
+• Throttle Position: 2%
+• O2 Sensor B1S1: 0.1V (lean)</p>
+            </div>
+          </div>
+
+          <div class="mt-4 bg-blue-500/10 border border-blue-500/30 rounded-xl p-4">
+            <p class="text-blue-300 text-sm">
+              <strong>💡 Notice:</strong> Starting with "diagnose vehicle issue:" triggers the advanced diagnostic report mode with structured output and confidence scores.
+            </p>
+          </div>
+        </div>
+
+        <!-- AI Response - Styled like the screenshot -->
+        <div class="mb-10">
+          <h2 class="text-2xl font-bold text-white mb-4 flex items-center">
+            <span class="w-8 h-8 bg-brand-blue rounded-full flex items-center justify-center text-sm font-bold text-white mr-3">2</span>
+            Diagnostic Report
+          </h2>
+          
+          <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+            <div class="bg-slate-800 px-4 py-2 text-xs text-slate-400 border-b border-slate-700 flex items-center">
+              <svg class="w-4 h-4 text-brand-blue mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+              </svg>
+              Autotech AI Expert - Diagnostics
+            </div>
+            <div class="p-5 space-y-5">
+
+              <!-- Header -->
+              <div class="flex items-center space-x-2 text-slate-400 text-sm">
+                <span>Hello! I've analyzed the scan tool data and symptoms for your 2018 Honda Accord 2.0T. Here is the diagnostic report:</span>
+              </div>
+
+              <!-- Report Title -->
+              <div class="flex items-center space-x-3">
+                <span class="text-2xl">🔧</span>
+                <h3 class="text-2xl font-bold text-white">Diagnostic Report</h3>
+              </div>
+
+              <!-- Input Summary -->
+              <div>
+                <h4 class="font-bold text-white mb-2">Input</h4>
+                <ul class="text-slate-300 text-sm space-y-1 ml-4">
+                  <li>• <strong class="text-slate-200">Symptoms:</strong> Engine running rough at idle, hesitation on acceleration, check engine light on</li>
+                  <li>• <strong class="text-slate-200">DTCs:</strong> P0300, P0171</li>
+                  <li>• <strong class="text-slate-200">Sensors:</strong> engine_rpm=650.0, short_term_fuel_trim=18.0, long_term_fuel_trim=15.0, maf=3.2, intake_air_temp=75.0, coolant_temp=195.0, throttle_position=2.0, o2_sensor_b1s1=0.1</li>
+                </ul>
+              </div>
+
+              <!-- Diagnosis -->
+              <div class="border-t border-slate-800 pt-4">
+                <h4 class="font-bold text-white mb-2">Diagnosis</h4>
+                <div class="flex items-center space-x-3 mb-2">
+                  <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+                  <span class="text-white font-semibold">Vacuum Leak</span>
+                </div>
+                <p class="text-slate-400 text-sm">Confidence: <strong class="text-white">39.2%</strong></p>
+              </div>
+
+              <!-- Also Consider -->
+              <div>
+                <h4 class="font-bold text-white mb-2">Also Consider</h4>
+                <ul class="text-slate-300 text-sm space-y-1 ml-4">
+                  <li>• Fuel Injector Clogged: 23.1%</li>
+                  <li>• Fuel Pump Weak: 17.3%</li>
+                </ul>
+              </div>
+
+              <!-- Confirm Diagnosis -->
+              <div class="bg-green-500/10 border border-green-500/30 rounded-lg p-4">
+                <h4 class="font-bold text-green-400 mb-2 flex items-center">
+                  <span class="mr-2">✓</span> Confirm Diagnosis
+                </h4>
+                <p class="text-slate-300 text-sm mb-2">Perform these tests to verify:</p>
+                <ol class="text-slate-300 text-sm space-y-1 list-decimal list-inside ml-2">
+                  <li>Smoke test intake system</li>
+                  <li>Spray carb cleaner around intake - RPM change indicates leak</li>
+                  <li>Check vacuum hoses for cracks</li>
+                </ol>
+              </div>
+
+              <!-- Recommended Actions -->
+              <div>
+                <h4 class="font-bold text-white mb-2 flex items-center">
+                  <span class="mr-2">🔧</span> Recommended Actions
+                </h4>
+                <ol class="text-slate-300 text-sm space-y-1 list-decimal list-inside ml-2">
+                  <li><strong class="text-white">Visual Inspection</strong> - Check for obvious issues: loose connections, damaged hoses, leaks, corrosion, burnt wires, or physical damage in the affected area.</li>
+                </ol>
+              </div>
+
+              <!-- Additional Context -->
+              <div class="border-t border-slate-800 pt-4">
+                <p class="text-sm text-yellow-400 mb-3">Low confidence. Additional diagnostic tests recommended.</p>
+                
+                <h4 class="font-bold text-white mb-2">Additional Diagnostic Context</h4>
+                <p class="text-slate-300 text-sm mb-3">
+                  The combined fuel trims (+33% total) confirm the computer is fighting a severe lean condition. Because the issue is present at idle (650 RPM), a vacuum leak is a primary suspect. In a speed-density or MAF-equipped system like this Honda, unmetered air entering after the sensor has the greatest impact when the throttle plate is nearly closed.
+                </p>
+
+                <h5 class="font-semibold text-white text-sm mb-2">Diagnostic Reasoning:</h5>
+                <ol class="text-slate-300 text-sm space-y-2 list-decimal list-inside ml-2">
+                  <li><strong class="text-white">Vacuum vs. Fuel Delivery:</strong> To differentiate between a vacuum leak and a fuel delivery issue (like a weak pump), watch your fuel trims while holding the RPM at 2,500. If the trims improve (drop closer to 0%), it confirms a vacuum leak. If the trims stay high or get worse, you are likely looking at a fuel delivery or MAF issue.</li>
+                  <li><strong class="text-white">PCV System:</strong> On these turbo engines, check the PCV valve and its associated plumbing. A ruptured PCV diaphragm is a known source of "unmetered" air that can cause a P0171 and rough idle.</li>
+                  <li><strong class="text-white">Turbo Inlet/Intercooler Piping:</strong> Ensure all clamps on the intake tract and intercooler piping are tight. While these usually cause issues under boost, a leak here can still affect idle stability.</li>
+                </ol>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- What You Get -->
+        <div class="mb-10">
+          <h2 class="text-2xl font-bold text-white mb-4">What the Report Includes</h2>
+          
+          <div class="grid md:grid-cols-2 gap-4">
+            <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-4">
+              <div class="text-2xl mb-2">📊</div>
+              <h4 class="font-bold text-white mb-1">Confidence Scores</h4>
+              <p class="text-slate-400 text-sm">Probability-based ranking of likely causes based on ML + Bayesian analysis</p>
+            </div>
+            <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-4">
+              <div class="text-2xl mb-2">🧪</div>
+              <h4 class="font-bold text-white mb-1">Confirmation Tests</h4>
+              <p class="text-slate-400 text-sm">Specific tests to verify or rule out each diagnosis</p>
+            </div>
+            <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-4">
+              <div class="text-2xl mb-2">🔧</div>
+              <h4 class="font-bold text-white mb-1">Repair Actions</h4>
+              <p class="text-slate-400 text-sm">Recommended repair steps once diagnosis is confirmed</p>
+            </div>
+            <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-4">
+              <div class="text-2xl mb-2">💡</div>
+              <h4 class="font-bold text-white mb-1">Reasoning Explanation</h4>
+              <p class="text-slate-400 text-sm">Why the AI reached this conclusion — not just "what" but "why"</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Try It Box -->
+        <div class="bg-gradient-to-r from-brand-blue/20 to-brand-accent/20 border border-brand-blue/30 rounded-2xl p-8 text-center">
+          <h2 class="text-2xl font-bold text-white mb-4">Try It Yourself</h2>
+          <p class="text-slate-300 mb-6">Got all your data ready? Start with "diagnose vehicle issue:" and paste everything.</p>
+          <a href="/auth" class="inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-full text-white bg-brand-blue hover:bg-cyan-600 transition-all">
+            Start Diagnosis
+          </a>
+        </div>
+
+        <!-- Navigation -->
+        <div class="mt-12 flex justify-between">
+          <a href="symptom-diagnosis.html" class="text-slate-400 hover:text-white transition-colors flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+            Symptom-Based
+          </a>
+          <a href="specs-procedures.html" class="text-brand-blue hover:text-brand-accent transition-colors flex items-center">
+            Next: Procedures
+            <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </a>
+        </div>
+
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800 py-8">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-slate-500 text-sm">
+        <p>&copy; 2026 Autotech AI. All rights reserved.</p>
+      </div>
+    </footer>
+
+  </body>
+</html>

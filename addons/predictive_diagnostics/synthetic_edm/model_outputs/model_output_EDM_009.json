@@ -1,0 +1,27 @@
+{
+  "scenario_id": "EDM_009",
+  "predictions": [
+    {
+      "hypothesis": "Cooling pump failure",
+      "prob": 0.85,
+      "reason": [
+        "high coolant_temp_max",
+        "inverter THERMAL_DERATE",
+        "no flow data",
+        "pump current unavailable"
+      ],
+      "tests": [
+        "measure pump_motor_current_history",
+        "measure coolant_temp_last_60s_mean",
+        "measure inverter_status_last_60s"
+      ],
+      "mitigation": "limit torque, schedule pump repair or replacement"
+    }
+  ],
+  "requested_measurements": [
+    "pump_motor_current_history",
+    "coolant_temp_last_60s_mean",
+    "inverter_status_last_60s"
+  ],
+  "explanation": "High temperature and inverter derate still point to cooling failure; missing pump current necessitates fresh current trend, temperature trend, and inverter status to confirm."
+}

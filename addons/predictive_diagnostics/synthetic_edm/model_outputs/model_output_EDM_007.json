@@ -1,0 +1,45 @@
+{
+  "scenario_id": "EDM_007",
+  "predictions": [
+    {
+      "hypothesis": "High internal resistance cell causing voltage sag",
+      "prob": 0.6,
+      "reason": [
+        "Ia_max 683A high",
+        "Vdc_min 318V low",
+        "cell voltage spread not yet measured"
+      ],
+      "tests": [
+        "measure cell_voltage_1_history",
+        "measure cell_voltage_2_history",
+        "measure Vdc_min_last_60s_mean",
+        "measure Ia_max_last_60s_mean"
+      ],
+      "mitigation": "Identify and replace high\u2011resistance cell, balance pack, monitor voltage sag"
+    },
+    {
+      "hypothesis": "Cell imbalance across pack",
+      "prob": 0.4,
+      "reason": [
+        "potential uneven charging",
+        "no cell voltage spread data yet"
+      ],
+      "tests": [
+        "measure cell_voltage_1_history",
+        "measure cell_voltage_2_history",
+        "measure cell_voltage_3_history",
+        "measure Vdc_min_last_60s_mean"
+      ],
+      "mitigation": "Run BMS balancing routine, inspect cells for degradation"
+    }
+  ],
+  "requested_measurements": [
+    "cell_voltage_1_history",
+    "cell_voltage_2_history",
+    "cell_voltage_3_history",
+    "Vdc_min_last_60s_mean",
+    "Ia_max_last_60s_mean",
+    "coolant_temp_last_60s_mean"
+  ],
+  "explanation": "Need cell voltage histories and refined Vdc/Ia averages to differentiate sag from imbalance."
+}

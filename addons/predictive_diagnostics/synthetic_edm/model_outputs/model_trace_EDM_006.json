@@ -1,0 +1,122 @@
+{
+  "trace": [
+    [
+      {
+        "scenario_id": "EDM_006",
+        "predictions": [
+          {
+            "hypothesis": "Phase A FET short",
+            "prob": 0.85,
+            "reason": [
+              "OVERCURRENT_FAULT in inverter status",
+              "high Ia_max",
+              "coolant temp near limit"
+            ],
+            "tests": [
+              "measure Ia_history",
+              "measure phase_A_current_history",
+              "measure Vdc_min_last_60s_mean"
+            ],
+            "mitigation": "shutdown motor, limit load, schedule FET replacement"
+          }
+        ],
+        "requested_measurements": [
+          "Ia_history",
+          "phase_A_current_history",
+          "Vdc_min_last_60s_mean"
+        ],
+        "explanation": "High phase current and inverter fault point to a shorted FET; coolant temp close to max indicates thermal stress."
+      },
+      {
+        "Ia_history": [
+          -3.332184700555389,
+          101.19436379142309,
+          213.82719589345103,
+          312.790610416672,
+          415.496200039796,
+          525.1218874448771,
+          636.7902963014291,
+          670.6360861948237,
+          660.9692916198728,
+          660.5418129476204,
+          664.4123668629768,
+          662.1993470860557,
+          672.8622337178736,
+          668.374233772762,
+          667.4272330665221,
+          669.3855828239249,
+          664.7498713127852,
+          663.288779764087,
+          664.0180774568129,
+          660.5704799263686
+        ],
+        "phase_A_current_history": "NOT_AVAILABLE",
+        "Vdc_min_last_60s_mean": "NOT_AVAILABLE"
+      }
+    ],
+    [
+      {
+        "scenario_id": "EDM_006",
+        "predictions": [
+          {
+            "hypothesis": "Phase A FET short",
+            "prob": 0.8,
+            "reason": [
+              "OVERCURRENT_FAULT & high Ia_max",
+              "coolant temp near limit",
+              "missing phase_A_current_history",
+              "inverter status points to current fault"
+            ],
+            "tests": [
+              "measure phase_A_current_history",
+              "measure Vdc_min_last_60s_mean"
+            ],
+            "mitigation": "shutdown motor, limit load, schedule FET replacement"
+          }
+        ],
+        "requested_measurements": [
+          "phase_A_current_history",
+          "Vdc_min_last_60s_mean"
+        ],
+        "explanation": "High current, inverter fault and thermal stress suggest a phase\u2011FET short; confirming phase current and DC\u2011bus levels will validate the diagnosis."
+      },
+      {
+        "phase_A_current_history": "NOT_AVAILABLE",
+        "Vdc_min_last_60s_mean": "NOT_AVAILABLE"
+      }
+    ],
+    [
+      {
+        "scenario_id": "EDM_006",
+        "predictions": [
+          {
+            "hypothesis": "Phase A FET short",
+            "prob": 0.75,
+            "reason": [
+              "OVERCURRENT_FAULT & high Ia_max",
+              "coolant temp near limit",
+              "inverter status indicates current fault"
+            ],
+            "tests": [
+              "measure phase_A_current_history",
+              "measure Vdc_min_last_60s_mean",
+              "measure phase_B_current_history"
+            ],
+            "mitigation": "shutdown motor, limit load, schedule FET replacement"
+          }
+        ],
+        "requested_measurements": [
+          "phase_A_current_history",
+          "Vdc_min_last_60s_mean",
+          "phase_B_current_history"
+        ],
+        "explanation": "High current, inverter fault, and near\u2011max coolant temp point to a phase\u2011FET short; additional phase current and DC\u2011bus data are needed to confirm."
+      },
+      {
+        "phase_A_current_history": "NOT_AVAILABLE",
+        "Vdc_min_last_60s_mean": "NOT_AVAILABLE",
+        "phase_B_current_history": "NOT_AVAILABLE"
+      }
+    ]
+  ]
+}

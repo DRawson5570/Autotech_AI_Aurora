@@ -1,0 +1,233 @@
+{
+  "trace": [
+    [
+      {
+        "scenario_id": "EDM_007",
+        "predictions": [
+          {
+            "hypothesis": "BMS cell imbalance or high internal resistance cell",
+            "prob": 0.85,
+            "reason": [
+              "high Ia_max (682A) for 51\u00b0C coolant temp",
+              "Vdc_min low at 318V indicating voltage sag",
+              "BMS cell imbalance typical cause of voltage sag and high current"
+            ],
+            "tests": [
+              "measure cell_voltage_1_history",
+              "measure cell_voltage_1_last_60s_mean",
+              "measure cell_voltage_2_history"
+            ],
+            "mitigation": "replace or repair the affected cell(s) and recalibrate BMS"
+          }
+        ],
+        "requested_measurements": [
+          "cell_voltage_1_history",
+          "cell_voltage_1_last_60s_mean",
+          "cell_voltage_2_history"
+        ],
+        "explanation": "High current draw combined with low pack voltage suggests a single cell is dropping; measuring individual cell voltages will confirm imbalance."
+      },
+      {
+        "cell_voltage_1_history": [
+          87.48878260648014,
+          87.52705822708246,
+          87.8411594317835,
+          87.78810378555649,
+          87.276426589542,
+          87.73515616459599,
+          87.27553704152311,
+          87.16247539740976,
+          87.7038428098042,
+          87.68063529783153,
+          87.36731050640564,
+          87.77366586932375,
+          87.62027887084564,
+          87.87083499085482,
+          87.62611899652498,
+          87.93072011355027,
+          87.46418872297497,
+          87.28537285644134,
+          87.6382240295492,
+          87.4506908776545
+        ],
+        "cell_voltage_1_last_60s_mean": "NOT_AVAILABLE",
+        "cell_voltage_2_history": [
+          87.63542863496322,
+          87.55121857482662,
+          87.84947492792053,
+          87.79053975556499,
+          87.36022547590119,
+          87.7106803850616,
+          87.25731588346444,
+          87.10575373965202,
+          87.61786919475422,
+          87.6017342785159,
+          87.17560571757964,
+          87.57969216377873,
+          87.24212261615294,
+          87.65727002828244,
+          87.35343775138371,
+          87.53814150399769,
+          87.0917437815498,
+          86.89016769747877,
+          87.22041764795225,
+          87.04920849079869
+        ]
+      }
+    ],
+    [
+      {
+        "scenario_id": "EDM_007",
+        "predictions": [
+          {
+            "hypothesis": "High internal resistance cell causing voltage sag",
+            "prob": 0.75,
+            "reason": [
+              "high Ia_max 683A",
+              "low Vdc_min 318V",
+              "no large cell voltage spread"
+            ],
+            "tests": [
+              "measure cell_voltage_1_last_60s_mean",
+              "measure cell_voltage_2_last_60s_mean",
+              "measure Vdc_min_last_60s_mean",
+              "measure Ia_max_last_60s_mean"
+            ],
+            "mitigation": "identify and replace high\u2011resistance cell, balance pack and monitor voltage sag"
+          }
+        ],
+        "requested_measurements": [
+          "cell_voltage_1_last_60s_mean",
+          "cell_voltage_2_last_60s_mean",
+          "Vdc_min_last_60s_mean",
+          "Ia_max_last_60s_mean"
+        ],
+        "explanation": "Current and voltage data suggest internal resistance issue rather than cell imbalance; requested averages will confirm sag pattern."
+      },
+      {
+        "cell_voltage_1_last_60s_mean": "NOT_AVAILABLE",
+        "cell_voltage_2_last_60s_mean": "NOT_AVAILABLE",
+        "Vdc_min_last_60s_mean": "NOT_AVAILABLE",
+        "Ia_max_last_60s_mean": "NOT_AVAILABLE"
+      }
+    ],
+    [
+      {
+        "scenario_id": "EDM_007",
+        "predictions": [
+          {
+            "hypothesis": "High internal resistance cell causing voltage sag",
+            "prob": 0.6,
+            "reason": [
+              "Ia_max 683A high",
+              "Vdc_min 318V low",
+              "cell voltage spread not yet measured"
+            ],
+            "tests": [
+              "measure cell_voltage_1_history",
+              "measure cell_voltage_2_history",
+              "measure Vdc_min_last_60s_mean",
+              "measure Ia_max_last_60s_mean"
+            ],
+            "mitigation": "Identify and replace high\u2011resistance cell, balance pack, monitor voltage sag"
+          },
+          {
+            "hypothesis": "Cell imbalance across pack",
+            "prob": 0.4,
+            "reason": [
+              "potential uneven charging",
+              "no cell voltage spread data yet"
+            ],
+            "tests": [
+              "measure cell_voltage_1_history",
+              "measure cell_voltage_2_history",
+              "measure cell_voltage_3_history",
+              "measure Vdc_min_last_60s_mean"
+            ],
+            "mitigation": "Run BMS balancing routine, inspect cells for degradation"
+          }
+        ],
+        "requested_measurements": [
+          "cell_voltage_1_history",
+          "cell_voltage_2_history",
+          "cell_voltage_3_history",
+          "Vdc_min_last_60s_mean",
+          "Ia_max_last_60s_mean",
+          "coolant_temp_last_60s_mean"
+        ],
+        "explanation": "Need cell voltage histories and refined Vdc/Ia averages to differentiate sag from imbalance."
+      },
+      {
+        "cell_voltage_1_history": [
+          87.48878260648014,
+          87.52705822708246,
+          87.8411594317835,
+          87.78810378555649,
+          87.276426589542,
+          87.73515616459599,
+          87.27553704152311,
+          87.16247539740976,
+          87.7038428098042,
+          87.68063529783153,
+          87.36731050640564,
+          87.77366586932375,
+          87.62027887084564,
+          87.87083499085482,
+          87.62611899652498,
+          87.93072011355027,
+          87.46418872297497,
+          87.28537285644134,
+          87.6382240295492,
+          87.4506908776545
+        ],
+        "cell_voltage_2_history": [
+          87.63542863496322,
+          87.55121857482662,
+          87.84947492792053,
+          87.79053975556499,
+          87.36022547590119,
+          87.7106803850616,
+          87.25731588346444,
+          87.10575373965202,
+          87.61786919475422,
+          87.6017342785159,
+          87.17560571757964,
+          87.57969216377873,
+          87.24212261615294,
+          87.65727002828244,
+          87.35343775138371,
+          87.53814150399769,
+          87.0917437815498,
+          86.89016769747877,
+          87.22041764795225,
+          87.04920849079869
+        ],
+        "cell_voltage_3_history": [
+          87.54976904567252,
+          87.51206055056022,
+          87.83362271529741,
+          87.79023387072995,
+          87.2657361692154,
+          87.7129263937491,
+          87.31419677637899,
+          87.09810106991584,
+          87.6964081043026,
+          87.66893144836753,
+          87.40016987236768,
+          87.83540001030036,
+          87.56378837645167,
+          87.94307742766661,
+          87.61969126768456,
+          87.94299117860272,
+          87.33654628088115,
+          87.32044696377281,
+          87.6752414872596,
+          87.50973876480286
+        ],
+        "Vdc_min_last_60s_mean": "NOT_AVAILABLE",
+        "Ia_max_last_60s_mean": "NOT_AVAILABLE",
+        "coolant_temp_last_60s_mean": "NOT_AVAILABLE"
+      }
+    ]
+  ]
+}
