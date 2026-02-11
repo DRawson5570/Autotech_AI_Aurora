@@ -25,6 +25,13 @@ context.load(project)  → Load project context + recent discussions
 project.update()       → Update project status
 ```
 
+### Meeting Notes (HABIT)
+**Read:** `skills/meeting-notes/SKILL.md`  
+When discussing projects with Douglas, **take notes** per the skill standards:
+- Location: `/projects/{name}/notes/YYYY-MM-DD-{topic}.md`
+- Format: Standard header + required sections
+- Action: Commit immediately after saving
+
 ## Wake Options
 
 **1. Check Projects** → Pick one → Load context → Work autonomously
